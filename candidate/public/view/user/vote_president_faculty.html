@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="/public/img/icon_logo.png" type="image/x-icon">
+    <title>Vote President of Student Association</title>
+    <link href="/public/css/bootstrap.min.css" rel="stylesheet">
+    <script src="/public/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="/public/css/info.css">
+    <link rel="stylesheet" href="/public/css/detail.css">
+    <script src="/public/js/header.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.16/dist/sweetalert2.all.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.16/dist/sweetalert2.min.css">
+</head>
+
+<body>
+    <h3 style="text-align: center; padding-top: 2rem; margin-bottom: 2rem;">President of Student Association Voting</h3>
+    <div class="container" id="candidateList">
+        <!-- Candidates will be displayed here -->
+    </div>
+
+    <!-- Loading indicator -->
+    <div id="loading" style="display: none; text-align: center;">Loading candidates...</div>
+
+    <!-- Vote and Abstention buttons -->
+    <div class="col-md-auto text-center mt-4 mb-4">
+        <div class="card-body">
+            <button class="btn-vote btn btn-success" id="voteBtn">Vote</button>
+            <button class="btn-Abstention btn btn-secondary ms-3" id="abstentionBtn">Abstention</button>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;  // Variable to store the currently logged-in user
+        const candidateType = "President of the Faculty Student Council";
+
+        // Fetch the list of candidates
+        function fetchCandidates() {
+            document.getElementById('loading').style.display = 'block'; // Show loading indicator
+
+            fetch(`/api/pending?type=${encodeURIComponent(candidateType)}`)
+                .then(response => response.json())
+                .then(candidates => {
+                    const candidateListContainer = document.getElementById('candidateList');
+                    candidateListContainer.innerHTML = ''; // Clear existing list
+
+                    candidates.forEach(candidate => {
+                        const candidateCard = `
+                            <div class="d-flex align-items-center mb-3" id="candidate${candidate.id}">
+                                <div class="card-container me-5">
+                                    <div class="card">
+                                        <div class="row g-0">
+                                            <div class="col-md-2 text-center">
+                                                <img src="http://localhost:3000${candidate.picture_url}" class="img-fluid rounded-start" alt="Candidate Picture">
+                                                <div class="mt-2">No.${candidate.id}</div>
+                                            </div>
+                                            <div class="col-md-10">
+                                                <div class="card-body">
+                                                    <h5>
+                                                        <div><strong>Name:</strong> ${candidate.name}</div>
+                                                        <div><strong>Student ID:</strong> ${candidate.studentID}</div>
+                                                        <div><strong>School:</strong> ${candidate.school}</div>
+                                                        <div><strong>Major:</strong> ${candidate.major}</div>
+                                                        <button class="btn btn-primary btn-policy" data-candidate-id="${candidate.id}">View Policies</button>
+                                                    </h5>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="checkbox-wrapper ms-3">
+                                    <label style="font-size: 20px;">
+                                        Vote
+                                        <input type="radio" name="candidateVote" class="form-check-input candidate-radio" id="candidate${candidate.id}" value="${candidate.id}">
+                                    </label>
+                                </div>
+                            </div>
+                        `;
+                        candidateListContainer.innerHTML += candidateCard;
+                    });
+
+                    // Add event listeners for "View Policies" button
+                    document.querySelectorAll('.btn-policy').forEach(button => {
+                        button.addEventListener('click', function () {
+                            const candidateId = this.getAttribute('data-candidate-id');
+                            fetchCandidatePolicies(candidateId);
+                        });
+                    });
+
+                    document.getElementById('loading').style.display = 'none'; // Hide loading indicator
+                })
+                .catch(error => {
+                    console.error('Error fetching candidates:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Unable to fetch candidate data.',
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                    });
+                    document.getElementById('loading').style.display = 'none'; // Hide loading on error
+                });
+        }
+
+        function fetchCandidatePolicies(candidateId) {
+            fetch(`/api/policies/${candidateId}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log("✅ Policy Data:", data);
+
+                    if (!data || data.length === 0) {
+                        Swal.fire({
+                            title: 'No Policies Found',
+                            text: 'This candidate does not have any policies.',
+                            icon: 'info',
+                            confirmButtonText: 'OK',
+                        });
+                        return;
+                    }
+
+                    let policyList = '';
+                    data.forEach(policy => {
+                        policyList += `<li>${policy.policy_detail}</li>`;
+                    });
+
+                    const policyPoster = data[0].policy_poster_url
+                        ? `<img src="http://localhost:3000${data[0].policy_poster_url}" class="img-fluid" alt="Policy Poster">`
+                        : '<p style="color: red;">No policy poster available.</p>';
+
+                    Swal.fire({
+                        title: `Policy Details`,
+                        html: `${policyPoster} 
+                        <h3>Policy Details</h3>
+                        <ul style="list-style-type: none; padding: 0;">
+                        ${policyList}
+                        </ul>`,
+                        confirmButtonText: 'Close',
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching policy data:', error);
+                });
+        }
+
+        // Fetch user data (student ID)
+        async function fetchUserData() {
+            try {
+                const response = await fetch("/user-info");  // Adjusted to fetch from /user-info
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Assuming the response contains user data
+                    document.getElementById("userName").textContent = data.name || "No Name Available";
+                    document.getElementById("studentID").textContent = data.studentID || "Unknown ID"; // Set Student ID
+                    // Store user data globally for future use in voting
+                    window.currentUser = data;
+                } else {
+                    console.error("User not authenticated");
+                    Swal.fire({
+                        title: "Error",
+                        text: "User is not authenticated. Please log in.",
+                        icon: "error",
+                        confirmButtonText: "OK",
+                    });
+                }
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            }
+        }
+
+        // Voting button click event
+        document.getElementById('voteBtn').addEventListener('click', function () {
+            const selectedCandidate = document.querySelector('input[name="candidateVote"]:checked');
+            if (!selectedCandidate) {
+                Swal.fire({
+                    title: "No Candidate Selected",
+                    text: "Please select a candidate before voting.",
+                    icon: "warning",
+                    confirmButtonText: "OK",
+                });
+                return;
+            }
+
+            // Ensure the user data has been loaded
+            if (!window.currentUser) {
+                Swal.fire({
+                    title: "User Not Found",
+                    text: "Please log in before voting.",
+                    icon: "error",
+                    confirmButtonText: "OK",
+                });
+                return;
+            }
+
+            const studentId = window.currentUser.studentID;  // Use the stored studentId from window.currentUser
+            const candidateId = selectedCandidate.value;
+            const isAbstention = false;
+
+            // Send the vote data to the server
+            fetch('/api/votefaculty', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    studentId,
+                    candidateId,
+                    isAbstention,
+                }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    Swal.fire({
+                        title: "Your vote has been recorded",
+                        icon: "success",
+                        confirmButtonText: "OK",
+                    }).then(() => {
+                        window.location.href = "/home";
+                    });
+                })
+                .catch(error => {
+                    console.error('Error sending vote:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'There was an issue recording your vote.',
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                    });
+                });
+        });
+
+        // Abstention button click event
+        document.getElementById('abstentionBtn').addEventListener('click', function () {
+            // Check if the user data is available
+            if (!window.currentUser) {
+                Swal.fire({
+                    title: "User Not Found",
+                    text: "Please log in before voting.",
+                    icon: "error",
+                    confirmButtonText: "OK",
+                });
+                return;  // Exit if there's no user data
+            }
+            Swal.fire({
+                title: "Are you sure you want to abstain?",
+                text: "Your abstention will be recorded.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Yes, Abstain",
+                cancelButtonText: "Cancel",
+            }).then(result => {
+                if (result.isConfirmed) {
+                    const studentId = window.currentUser.studentID;
+                    const isAbstention = true;
+                    let candidateType = 'President of the Faculty Student Council';
+
+                    fetch('/api/votefaculty', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            studentId,
+                            candidateId: null,
+                            isAbstention,
+                            candidateType
+                        }),
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            Swal.fire({
+                                title: "Your abstention has been recorded",
+                                icon: "success",
+                                confirmButtonText: "OK",
+                            }).then(() => {
+                                window.location.href = "/home";
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Error sending abstention:', error);
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'There was an issue recording your abstention.',
+                                icon: 'error',
+                                confirmButtonText: 'OK',
+                            });
+                        });
+                }
+            });
+        });
+
+        // Fetch voting status for the current user when the page loads
+        async function fetchVotingStatus(candidateType) {
+            const studentId = window.currentUser ? window.currentUser.studentID : null;
+            if (!studentId) {
+                console.error("Student ID not found in currentUser");
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/vote-status/${studentId}?candidateType=${candidateType}`);
+
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch voting status. Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                console.log('Voting status data:', data); // Log the response to inspect the structure
+
+                if (data.hasVoted) {
+                    // Disable voting and abstention buttons if the user has already voted for this candidate type
+                    document.getElementById('voteBtn').disabled = true;
+                    document.getElementById('abstentionBtn').disabled = true;
+                } else {
+                    // Enable voting buttons if the user hasn't voted yet
+                    document.getElementById('voteBtn').disabled = false;
+                    document.getElementById('abstentionBtn').disabled = false;
+                }
+            } catch (error) {
+                console.error('Error checking voting status:', error);
+            }
+        }
+
+        // Initialize the page
+        window.onload = function () {
+            fetchUserData().then(() => {
+                fetchCandidates();
+                fetchVotingStatus("President of the Faculty Student Council");
+            });
+        };
+    </script>
+</body>
+
+</html>

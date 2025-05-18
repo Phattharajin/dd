@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Condition Edit</title>
+    <link href="/public/css/bootstrap.min.css" rel="stylesheet">
+    <script src="/public/js/bootstrap.bundle.min.js"></script>
+    <script src="/public/js/header.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="/public/css/editnaja.css">
+</head>
+
+<body>
+    <div class="container mt-5 text-center">
+        <h4 id="headerText" contenteditable="false">Loading...</h4>
+        <div class="edit-btn-container">
+            <button id="editTextBtn" class="btn btn-primary" onclick="editText()">Edit Text</button>
+        </div>
+
+        <!-- Upload Section -->
+        <div>
+            <label for="uploadPicture" class="form-label">Upload JPG Image</label>
+            <input type="file" class="form-control w-50 mx-auto" id="uploadPicture" accept="image/jpeg" multiple>
+        </div>
+
+        <p id="uploadMessage" class="mt-2">You can add images by clicking Choose Files.</p>
+
+        <!-- Uploaded Images Section -->
+        <div id="uploadedSection" style="display: none;">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <h5 class="text-start">Uploaded Images:</h5>
+                    <div id="imageContainer" class="d-flex flex-column border p-3"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Save Button -->
+        <div class="button-container d-flex justify-content-center mt-3">
+            <button id="saveChangesBtn" class="btn btn-success btn-lg" style="display: none;"
+                onclick="saveChanges()">Save Changes</button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:3000";
+        const headerId = 2;
+
+        function fetchHeader() {
+            const headerElement = document.getElementById("headerText");
+            headerElement.innerText = "Loading...";
+
+            fetch(`${API_URL}/header/${headerId}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("headerText").innerText = data.text || "Default Header";
+                })
+                .catch(error => {
+                    console.error("Error fetching header:", error);
+                    document.getElementById("headerText").innerText = "Error loading header";
+                });
+        }
+
+        // Enable editing of the header text
+        function editText() {
+            let headerText = document.getElementById("headerText");
+            headerText.contentEditable = "true";
+            headerText.focus();
+            document.getElementById("saveChangesBtn").style.display = "inline-block";
+            document.getElementById("editTextBtn").style.display = "none";
+        }
+
+        // Save the edited header text to the backend
+        function saveChanges() {
+            const headerText = document.getElementById("headerText").innerText;
+
+            fetch(`${API_URL}/save-header/${headerId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ headerText })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    Swal.fire("Success", "Header updated successfully!", "success");
+                    document.getElementById("saveChangesBtn").style.display = "none";
+                    document.getElementById("editTextBtn").style.display = "inline-block";
+                    document.getElementById("headerText").contentEditable = "false";
+                })
+                .catch(error => console.error("Error saving header:", error));
+        }
+
+        // Fetch images associated with a header (if provided)
+        // Fetch images associated with a header (from the database)
+        function fetchImages() {
+            let url = `${API_URL}/images?headerId=${headerId}`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const imageContainer = document.getElementById("imageContainer");
+                    imageContainer.innerHTML = "";
+                    if (data.length > 0) {
+                        document.getElementById("uploadedSection").style.display = "block";
+                    }
+
+                    data.forEach(img => {
+                        let imgWrapper = document.createElement("div");
+                        imgWrapper.classList.add("image-item", "m-3");
+
+                        let image = document.createElement("img");
+                        image.src = API_URL + img.file_path;
+                        image.classList.add("border");
+                        image.style.maxWidth = "300px";
+
+                        let btnContainer = document.createElement("div");
+                        btnContainer.classList.add("btn-container");
+
+                        let editBtn = document.createElement("button");
+                        editBtn.textContent = "Edit";
+                        editBtn.classList.add("btn", "btn-warning", "btn-sm");
+
+                        editBtn.onclick = () => editImage(img.file_path, image);
+
+                        let deleteBtn = document.createElement("button");
+                        deleteBtn.textContent = "Delete";
+                        deleteBtn.classList.add("btn", "btn-danger", "btn-sm");
+
+                        deleteBtn.onclick = () => {
+                            console.log('Deleting image with file path:', img.file_path);
+                            deleteImage(img.file_path);
+                        };
+
+                        btnContainer.appendChild(editBtn);
+                        btnContainer.appendChild(deleteBtn);
+
+                        imgWrapper.appendChild(image);
+                        imgWrapper.appendChild(btnContainer);
+                        imageContainer.appendChild(imgWrapper);
+                    });
+
+                })
+                .catch(error => console.error("Error fetching images:", error));
+        }
+
+
+        // Handle image upload
+        document.getElementById("uploadPicture").addEventListener("change", function () {
+            let formData = new FormData();
+            for (let file of this.files) {
+                formData.append("images", file);
+            }
+            formData.append("headerId", headerId);
+
+            fetch(`${API_URL}/upload`, { method: "POST", body: formData })
+                .then(response => response.json())
+                .then(data => {
+                    Swal.fire("Success", "Images uploaded!", "success");
+                    fetchImages();
+                })
+                .catch(error => console.error("Error uploading images:", error));
+        });
+
+        // Delete image by file path
+        function deleteImage(filePath) {
+            if (!filePath) {
+                Swal.fire('Error!', 'Invalid file path.', 'error');
+                return;
+            }
+
+            console.log('Deleting image with file path:', filePath);
+
+            fetch(`${API_URL}/delete-image`, {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ filePath: filePath }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire('Deleted!', 'Image has been deleted.', 'success');
+
+                        const images = document.querySelectorAll("#imageContainer .image-item");
+                        images.forEach(imgWrapper => {
+                            const img = imgWrapper.querySelector("img");
+                            if (img && img.src.includes(filePath)) {
+                                imgWrapper.remove();
+                            }
+                        });
+
+                        if (document.querySelectorAll("#imageContainer .image-item").length === 0) {
+                            document.getElementById("uploadedSection").style.display = "none";
+                        }
+
+                    } else {
+                        Swal.fire('Error!', data.error || 'Could not delete the image.', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error deleting image:', error);
+                    Swal.fire('Error!', 'Could not delete the image.', 'error');
+                });
+        }
+
+
+        function editImage(filePath, imageElement) {
+            let inputFile = document.createElement("input");
+            inputFile.type = "file";
+            inputFile.accept = "image/jpeg";
+
+            inputFile.addEventListener("change", function (event) {
+                let file = event.target.files[0];
+                if (!file) {
+                    Swal.fire("Error!", "No file selected.", "error");
+                    return;
+                }
+
+                let formData = new FormData();
+                formData.append("image", file);
+                formData.append("filePath", filePath);
+
+                fetch(`${API_URL}/update-image`, {
+                    method: "PUT",
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            fetchImages();
+                            Swal.fire("Updated!", "Image has been replaced.", "success");
+                        } else {
+                            Swal.fire("Error!", data.error || "Could not update the image.", "error");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error updating image:", error);
+                        Swal.fire("Error!", "Could not update the image.", "error");
+                    });
+
+            });
+
+            inputFile.click();
+        }
+
+        // On page load, fetch the header and images
+        document.addEventListener("DOMContentLoaded", () => {
+            fetchHeader();
+            fetchImages();  // Fetch images for the same headerId
+        });
+    </script>
+</body>
+
+</html>

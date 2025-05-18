@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="/public/img/icon_logo.png" type="image/x-icon">
+    <title>Home</title>
+    <link href="/public/css/bootstrap.min.css" rel="stylesheet">
+    <script src="/public/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="/public/css/card.css">
+    <link rel="stylesheet" href="/public/css/detail.css">
+    <script src="/public/js/header.js"></script>
+</head>
+
+<body>
+    <div class="slider-container">
+        <div class="slider-background">
+            <img src="/public/img/mfu4.jpg" alt="Uploaded Image">
+
+            <div class="content">
+                <h1>Student Organization Election Mae Fah Luang University for the year 2022</h1>
+            </div>
+            <button class="edit-btn" style="background-color: white; color: black ;padding: 10px 20px; font-size: 20px;" onclick="editSlide(0)">Edit</button>
+        </div>
+        <div class="slider-background">
+            <img src="/public/img/mfu4.jpg" alt="Image 2">
+            <div class="content">
+                <h1>Election Results of Student Council</h1>
+            </div>
+            <button class="edit-btn " style="background-color: white; color: black ;padding: 10px 20px; font-size: 20px; " onclick="editSlide(1)">Edit</button>
+        </div>
+        <div class="slider-background">
+            <img src="/public/img/mfu3.jpg" alt="Image 3">
+            <div class="content">
+                <h1>Election Results of Student Union President</h1>
+            </div>
+            <button class="edit-btn" style="background-color: white; color: black ;padding: 10px 20px; font-size: 20px; " onclick="editSlide(2)">Edit</button>
+        </div>
+        <div class="nav-arrow prev">&#8249;</div>
+        <div class="nav-arrow next">&#8250;</div>
+        <div class="dots">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+        </div>
+    </div>
+
+
+    <div id="editModal" class="modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Slide</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="textDetail">Text Detail:</label>
+                    <input type="text" id="textDetail" class="form-control">
+                    <label for="linkDetail">Link Detail:</label>
+                    <input type="text" id="linkDetail" class="form-control">
+                    <label for="imageFile">Upload Image:</label>
+                    <input type="file" id="imageFile" class="form-control" onchange="previewImage(event)">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="saveChanges()">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <div class="card-container mt-5 pt-5">
+
+            <a href="/list_admin">
+                <div class="card other d-flex justify-content-center align-items-center"
+                    style="height: 100%; text-align: center; display: none;">
+                    <div class="card-title">List of System Administrators</div>
+                    <div style="position: absolute; bottom: 10px; right: 10px;">
+                        <i class="fas fa-file-alt fa-2x"></i>
+                    </div>
+                </div>
+            </a>
+
+            <a href="/list_user">
+                <div class="card other d-flex justify-content-center align-items-center"
+                    style="height: 100%; text-align: center; display: none;">
+                    <div class="card-title">List of General Users</div>
+                    <div style="position: absolute; bottom: 10px; right: 10px;">
+                        <i class="fas fa-file-alt fa-2x"></i>
+                    </div>
+                </div>
+            </a>
+
+            <a href="/list_candidate_menu">
+                <div class="card other d-flex justify-content-center align-items-center"
+                    style="height: 100%; text-align: center; display: none;">
+                    <div class="card-title">List of All candidates</div>
+                    <div style="position: absolute; bottom: 10px; right: 10px;">
+                        <i class="fas fa-file-alt fa-2x"></i>
+                    </div>
+                </div>
+            </a>
+
+            <a href="/datetime_setter_menu">
+                <div class="card other d-flex justify-content-center align-items-center"
+                    style="height: 100%; text-align: center; display: none;">
+                    <div class="card-title">Datetime Setter</div>
+                    <div style="position: absolute; bottom: 10px; right: 10px;">
+                        <i class="fas far fa-clock fa-2x"></i>
+                    </div>
+                </div>
+            </a>
+
+            <a href="/add_candidate">
+                <div class="card other d-flex justify-content-center align-items-center"
+                    style="height: 100%; text-align: center; display: none;">
+                    <div class="card-title">Add Candidate</div>
+                    <div style="position: absolute; bottom: 10px; right: 10px;">
+                        <i class="fas fa-plus-circle fa-2x"></i>
+                    </div>
+                </div>
+            </a>
+
+              <a href="/election_score_menu">
+                <div class="card other d-flex justify-content-center align-items-center"
+                    style="height: 100%; text-align: center; display: none;">
+                    <div class="card-title">Total Election Score</div>
+                    <div style="position: absolute; bottom: 10px; right: 10px;">
+                        <i class="fas fa-poll-h fa-2x"></i>
+                    </div>
+                </div>
+            </a>
+
+            <a href="/PDPA_edit">
+                <div class="card other d-flex justify-content-center align-items-center"
+                    style="height: 100%; text-align: center; display: none;">
+                    <div class="card-title">PDPA Edit</div>
+                    <div style="position: absolute; bottom: 10px; right: 10px;">
+                        <i class="fas fa-edit fa-2x"></i>
+                    </div>
+                </div>
+            </a>
+
+        </div>
+    </div>
+
+    <script>
+       let currentEditIndex = null;
+
+function editSlide(index) {
+currentEditIndex = index;
+const slide = document.querySelectorAll('.slider-background')[index];
+const textDetail = slide.querySelector('.content a')?.innerText || '';
+const linkDetail = slide.querySelector('.content a')?.href || '';
+
+document.getElementById('textDetail').value = textDetail;
+document.getElementById('linkDetail').value = linkDetail;
+
+new bootstrap.Modal(document.getElementById('editModal')).show();
+}
+
+function saveChanges() {
+const newTextDetail = document.getElementById("textDetail").value;
+const newLinkDetail = document.getElementById("linkDetail").value; // <- ต้องมีเพิ่มตัวนี้ด้วย
+const formData = new FormData();
+formData.append("textDetail", newTextDetail);
+formData.append("linkDetail", newLinkDetail);
+
+const newImage = document.getElementById("imageFile").files[0];
+if (newImage) {
+formData.append("image", newImage);
+}
+
+fetch(`http://localhost:3000/update-slide/${currentEditIndex + 1}`, {
+method: "POST",
+body: formData
+})
+.then(response => response.json())
+.then(data => {
+if (data.imagePath) {
+    document.querySelectorAll('.slider-background')[currentEditIndex].querySelector('img').src = data.imagePath;
+}
+location.reload();
+})
+.catch(error => console.error("Error:", error));
+}
+
+function previewImage(event) {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        document.querySelectorAll('.slider-background')[currentEditIndex].querySelector('img').src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+document.addEventListener("DOMContentLoaded", fetchSlides);
+
+function fetchSlides() {
+fetch("http://localhost:3000/get-slides")
+.then(response => response.json())
+.then(data => {
+    document.querySelectorAll(".slider-background").forEach((slide, index) => {
+        if (data[index]) {
+            const content = slide.querySelector(".content");
+            content.innerHTML = `<h1><a href="${data[index].linkDetail}" target="_blank">${data[index].textDetail}</a></h1>`;
+            slide.querySelector("img").src = "http://localhost:3000" + data[index].imagePath;
+        }
+    });
+})
+.catch(error => console.error("❌ Error fetching slides:", error));
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const slides = document.querySelectorAll('.slider-background');
+    const dots = document.querySelectorAll('.dot');
+    const prevArrow = document.querySelector('.prev');
+    const nextArrow = document.querySelector('.next');
+    let currentSlide = 0;
+
+    const showSlide = (index) => {
+        slides.forEach((slide, i) => {
+            slide.style.display = i === index ? 'block' : 'none';
+            dots[i].classList.toggle('active', i === index);
+        });
+    };
+
+    const showPrevSlide = () => {
+        currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+        showSlide(currentSlide);
+    };
+
+    const showNextSlide = () => {
+        currentSlide = (currentSlide + 1) % slides.length;
+        showSlide(currentSlide);
+    };
+
+    prevArrow.addEventListener('click', showPrevSlide);
+    nextArrow.addEventListener('click', showNextSlide);
+
+    dots.forEach((dot, index) => {
+        dot.addEventListener('click', () => {
+            currentSlide = index;
+            showSlide(currentSlide);
+        });
+    });
+
+    showSlide(currentSlide);
+});
+
+
+    </script>
+
+</body>
+
+</html>

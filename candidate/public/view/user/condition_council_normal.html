@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="/public/img/icon_logo.png" type="image/x-icon">
+    <title>Register Condition</title>
+    <link href="/public/css/bootstrap.min.css" rel="stylesheet">
+    <script src="/public/js/bootstrap.bundle.min.js"></script>
+    <script src="/public/js/header.js"></script>
+</head>
+
+<body>
+    <h4 id="headerText" class="ms-4" style="text-align: center; padding-top: 30px;"></h4>
+
+    <div id="imageContainer" style="text-align: center;"></div>
+
+    <div style="display: flex; justify-content: center; align-items: center; margin: 20px;">
+        <button id="submitBtn2"
+            style="background-color: #C39434; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin: 10px;">
+            Submit
+        </button>
+    </div>
+
+
+    <script>
+        document.getElementById('submitBtn2').addEventListener('click', function () {
+            window.location.href = '/register_council_normal';
+        });
+
+        fetch('/api/header-image/3')
+            .then(res => res.json())
+            .then(data => {
+
+                document.getElementById('headerText').innerText = data.header_text;
+
+                const container = document.getElementById('imageContainer');
+                container.innerHTML = ''; 
+
+                data.images.forEach(imgPath => {
+                    const img = document.createElement('img');
+                    img.src = imgPath;
+                    img.style.maxWidth = '40%';
+                    img.style.height = 'auto';
+                    img.style.marginTop = '20px';
+                    img.style.marginBottom = '20px';
+                    img.style.display = 'block';
+                    img.style.marginLeft = 'auto';
+                    img.style.marginRight = 'auto';
+                    container.appendChild(img);
+                });
+            })
+            .catch(err => {
+                console.error('Error fetching header data:', err);
+            });
+
+    </script>
+
+</body>
+
+</html>

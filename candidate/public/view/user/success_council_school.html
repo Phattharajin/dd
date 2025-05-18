@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="shortcut icon" href="/public/img/icon_logo.png" type="image/x-icon">
+  <title>Vote Successful</title>
+  <link href="/public/css/bootstrap.min.css" rel="stylesheet">
+  <script src="/public/js/bootstrap.bundle.min.js"></script>
+  <script src="/public/js/header.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.16/dist/sweetalert2.all.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.16/dist/sweetalert2.min.css">
+</head>
+<body>
+  <h1 style="text-align: center; padding-top: 2rem;">Voting Successful</h1>
+  <div style="text-align: center;">
+    <img id="candidateImage" style="max-width: 70%; height: 500px; margin-top: 30px;" alt="Candidate Picture">
+  </div>
+  <div style="display: flex; justify-content: center; align-items: center; margin: 50px;">
+    <button id="OKBtn"
+      style="background-color:#C39434; color: white; border: none; padding: 10px 20px; font-size: 15px; border-radius: 5px; cursor: pointer;"
+      onclick="window.location.href = '/home';">
+      OK
+    </button>
+  </div>
+  <script>
+    fetch('/api/vote-picture')
+      .then(response => response.json())
+      .then(data => {
+        if (data.imageData) {
+          const imgElement = document.getElementById('candidateImage');
+          imgElement.src = data.imageData;
+        } else {
+          console.error('No image data received.');
+          Swal.fire({
+            title: "Error",
+            text: "No candidate picture found.",
+            icon: "error",
+            confirmButtonText: "OK"
+          });
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching image data:', error);
+        Swal.fire({
+          title: "Error",
+          text: "Error fetching candidate picture.",
+          icon: "error",
+          confirmButtonText: "OK"
+        });
+      });
+  </script>
+</body>
+</html>

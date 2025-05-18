@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add User</title>
+    <link href="/public/css/bootstrap.min.css" rel="stylesheet">
+    <script src="/public/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="/public/css/info.css">
+    <link rel="stylesheet" href="/public/css/detail.css">
+    <script src="/public/js/header.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.16/dist/sweetalert2.all.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.16/dist/sweetalert2.min.css">
+</head>
+
+<body>
+    <div class="container mt-5">
+        <h2 class="text-center m-5">Add User</h2>
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-4">
+                <form id="registration-form">
+                    <input type="text" class="form-control mb-4 custom-input" id="name" placeholder="Name" required>
+                    <input type="email" class="form-control mb-4 custom-input" id="email" placeholder="Email" required>
+                    <input type="text" class="form-control mb-4 custom-input" id="studentID" placeholder="Student ID" required>
+                    <select class="form-control mb-4 custom-input" id="role" required>
+                        <option value="">Select Role</option>
+                        <option value="admin">Admin</option>
+                        <option value="committee">Committee</option>
+                    </select>
+                    <div class="text-center mb-5">
+                        <button type="submit" class="btn text-white" style="background-color: #E4001A; border: none;">SUBMIT</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .custom-input {
+            width: 80%;
+            margin: 0 auto;
+        }
+    </style>
+
+<script>
+    document.getElementById("registration-form").addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const name = document.getElementById("name").value.trim();
+const email = document.getElementById("email").value.trim();
+const studentID = document.getElementById("studentID").value.trim();
+const role = document.getElementById("role").value.trim();
+
+if (!name || !email || !studentID || !role) {
+    Swal.fire({
+        title: "Error!",
+        text: "All fields are required.",
+        icon: "error",
+        confirmButtonText: "OK"
+    });
+    return;
+}
+        if (!name || !email || !studentID || !role) {
+            Swal.fire({
+                title: "Error!",
+                text: "All fields are required.",
+                icon: "error",
+                confirmButtonText: "OK"
+            });
+            return;
+        }
+
+        // Email validation
+        if (!email.endsWith("@lamduan.mfu.ac.th") && !email.endsWith("@mfu.ac.th")) {
+            Swal.fire({
+                title: "Error!",
+                text: "Email must end with @lamduan.mfu.ac.th or @mfu.ac.th",
+                icon: "error",
+                confirmButtonText: "OK"
+            });
+            return;
+        }
+
+        try {
+            const response = await fetch("http://localhost:3000/add-user", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ name, email, studentID, role })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                Swal.fire({
+                    title: "Success!",
+                    text: result.message,
+                    icon: "success",
+                    confirmButtonText: "OK"
+                });
+            } else {
+                Swal.fire({
+                    title: "Error!",
+                    text: result.message,
+                    icon: "error",
+                    confirmButtonText: "OK"
+                });
+            }
+        } catch (error) {
+            console.error("Error during submission:", error);
+            Swal.fire({
+                title: "Error!",
+                text: "There was an error processing your request. Please try again later.",
+                icon: "error",
+                confirmButtonText: "OK"
+            });
+        }
+    });
+</script>
+</body>
+
+</html>

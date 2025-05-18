@@ -1,0 +1,113 @@
+.president {
+  background-color: #DCD2DE;
+}
+
+.councilschool {
+  background-color: #6E96B8;
+}
+
+.councilschool i {
+  color: white;
+}
+
+.councilschool .card-title {
+  color: white;
+}
+
+.councilnormal {
+  background-color: #CFF2E5;
+}
+
+.faculty {
+  background-color: #EDC9AF;
+}
+
+.faculty i {
+  color: white;
+  /* Default icon color */
+}
+
+.faculty.black-text i {
+  color: black !important;
+  /* Change icon color when background is light */
+}
+
+.faculty .card-title {
+  color: white;
+  /* Default text color */
+}
+
+.faculty.black-text .card-title {
+  color: black !important;
+  /* Force black text for specific background colors */
+}
+
+.other {
+  background-color: #EA9D89;
+}
+
+.card-container {
+  display: grid;
+  grid-template-columns: repeat(4, 16rem);
+  /* Increased card width */
+  grid-auto-rows: 14rem;
+  /* Increased card height */
+  gap: 30px;
+  justify-content: center;
+  padding: 20px;
+}
+
+
+.card {
+  /* Remove any display property here that conflicts */
+  display: block;
+  /* or omit it */
+  width: 17rem;
+  /* Increase width */
+  height: 14rem;
+  /* Increase height */
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+  text-align: center;
+  padding: 20px;
+  /* Added padding for better content fit */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+  /* background-color: #FFF380 !important; */
+}
+
+.card-title {
+  font-size: 20px;
+  /* Increased font size */
+  font-weight: bold;
+  margin-bottom: 10px;
+  /* color: white; */
+}
+
+/* .card-title:hover {
+  color: black;
+} */
+
+.text-end {
+  align-self: flex-end;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.btn-same-size {
+  width: 120px;
+  /* Adjusted for the new card size */
+  height: 50px;
+}

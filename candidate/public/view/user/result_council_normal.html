@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vote Result</title>
+    <link rel="shortcut icon" href="/public/img/icon_logo.png" type="image/x-icon">
+    <link href="/public/css/bootstrap.min.css" rel="stylesheet">
+    <script src="/public/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="/public/css/info.css">
+    <link rel="stylesheet" href="/public/css/detail.css">
+    <script src="/public/js/header.js"></script>
+</head>
+
+<body>
+    <h3 style="text-align: center; padding-top: 2rem; margin-bottom: 2rem;">
+        Election Score (Student Council Member(Normal))
+    </h3>
+
+    <div class="container">
+        <div class="row" id="candidateContainer">
+            <!-- Cards will be injected here -->
+        </div>
+    </div>
+
+    <script>
+        async function fetchResults() {
+            try {
+                const response = await fetch('http://localhost:3000/api/election-results3');
+                const data = await response.json();
+
+                const container = document.getElementById('candidateContainer');
+                container.innerHTML = ''; // clear existing content
+
+                data.forEach(candidate => {
+                    const card = `
+                        <div class="col-md-4">
+                            <div class="card mb-3">
+                                <div class="row g-0">
+                                    <div class="col-md-12" style="text-align: center;">
+                                        <img src="${candidate.picture_url}" class="img-fluid rounded-start pt-3" alt="Candidate Picture"
+                                            style="object-fit: cover; height: 100%; max-height: 200px; width: auto;">
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="card-body" style="padding: 15px;">
+                                            <div><strong>No:</strong> ${candidate.candidate_id}</div>
+                                            <div><strong>Name:</strong> ${candidate.name}</div>
+                                            <div><strong>Score:</strong> 
+                                                <span style="font-size: 2em; display: block; text-align: center;">${candidate.score}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += card;
+                });
+            } catch (error) {
+                console.error('Failed to fetch vote results:', error);
+            }
+        }
+
+        // Fetch when page loads
+        window.onload = fetchResults;
+    </script>
+</body>
+
+</html>

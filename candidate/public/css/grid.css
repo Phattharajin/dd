@@ -1,0 +1,113 @@
+.container-fluid {
+    width: 100%;
+    padding: 20px;
+}
+
+.row {
+    display: flex;
+    width: 100%;
+}
+
+.grid-cell,
+.grid-cell1 {
+    border: 1px solid #ccc;
+    height: 55px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.col-1,
+.col-2,
+.col-3 {
+    min-width: 150px;
+    flex: 1;
+}
+
+.grid-cell {
+    background-color: #F6D072;
+    font-weight: bold;
+}
+
+.grid-cell1 {
+    background-color: #ffffff;
+}
+
+
+.row-checkbox {
+    display: inline-block;
+    margin-left: 10px;
+    vertical-align: middle;
+    width: 25px;
+    height: 25px;
+    border-radius: 5px;
+    display: inline-block;
+    background-color: white;
+    transition: all 0.3s ease;
+}
+
+.role-name select {
+    width: 100%;
+    border: none;
+    background-color: #fff;
+}
+
+
+.button-container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    width: 97%;
+    margin-bottom: 5px;
+    gap: 10px;
+}
+
+.button-container button {
+    width: 100px;
+    text-align: center;
+}
+
+.deletebtn,
+.editbtn {
+    color: white;
+    border: none;
+    padding: 10px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: larger;
+
+}
+
+.deletebtn {
+    background-color: #dc3545;
+}
+
+.deletebtn:hover {
+    background-color: #c82333;
+}
+
+.editbtn {
+    background-color: #C39434;
+}
+
+.editbtn:hover {
+    background-color: burlywood;
+}
+
+.btn-save-row {
+    display: none;
+    margin-top: 10px;
+    display: inline-block;
+}
+
+
+.user-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.user-row {
+    flex-grow: 1;
+}

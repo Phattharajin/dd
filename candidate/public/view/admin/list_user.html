@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="/public/img/icon_logo.png" type="image/x-icon">
+    <title>List User</title>
+    <link href="/public/css/bootstrap.min.css" rel="stylesheet">
+    <script src="/public/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="/public/css/grid.css">
+    <script src="/public/js/header.js"></script>
+</head>
+
+<body>
+    <div class="container mt-3 text-center">
+        <h2 class="text-center mb-4">User Information</h2>
+        <div class="mb-3   button-container">
+            <button class="editbtn btn btn-primary btn-sm" onclick="toggleEditMode(this)">Edit</button>
+            <button class="deletebtn btn btn-danger btn-sm" onclick="toggleDeleteMode()">Delete</button>
+        </div>
+
+        <div class="row mt-4">
+            <div class="row">
+                <div class="col-1 grid-cell">User_ID</div>
+                <div class="col-3 grid-cell">Username</div>
+                <div class="col-2 grid-cell">Role Name</div>
+                <div class="col-2 grid-cell">Action</div>
+            </div>
+
+            <div id="userTable"></div>
+
+            <div class="row save-container">
+                <button class="btn-save-row btn btn-success btn-sm" onclick="saveChanges()" style="display: none;">
+                    Save Changes
+                </button>
+            </div>
+        </div>
+        <script>
+            let isEditing = false;
+            let isDeleting = false;
+
+            document.addEventListener("DOMContentLoaded", function () {
+                document.querySelectorAll('.row-checkbox').forEach(checkbox => checkbox.style.display = 'none');
+                document.querySelector('.btn-save-row').style.display = 'none';
+                fetchUsers();
+            });
+
+            function toggleEditMode(button) {
+                isEditing = !isEditing;
+                isDeleting = false;
+
+                document.querySelectorAll('.user-row').forEach(row => {
+                    const roleCell = row.querySelector('.role-name');
+                    const userId = row.dataset.id;
+
+                    if (isEditing) {
+                        const currentRole = roleCell.textContent.trim();
+                        roleCell.innerHTML = `
+                            <select class="form-select role-dropdown" data-id="${userId}">
+                                <option value="user" ${currentRole === "user" ? "selected" : ""}>user</option>
+                                <option value="candidate" ${currentRole === "candidate" ? "selected" : ""}>candidate</option>
+                            </select>
+                        `;
+                    } else {
+                        const dropdown = roleCell.querySelector('.role-dropdown');
+                        if (dropdown) {
+                            const newRole = dropdown.value;
+                            roleCell.textContent = newRole;
+                            updateRole(userId, newRole);
+                        }
+                    }
+                });
+
+                document.querySelector('.btn-save-row').style.display = isEditing ? 'inline-block' : 'none';
+                button.textContent = isEditing ? 'Cancel' : 'Edit';
+            }
+
+            function toggleDeleteMode() {
+                isDeleting = !isDeleting;
+                isEditing = false;
+
+                document.querySelectorAll('.row-checkbox').forEach(checkbox => {
+                    checkbox.style.display = isDeleting ? 'inline-block' : 'none';
+                    checkbox.checked = false;
+                });
+
+                document.querySelector('.btn-save-row').style.display = isDeleting ? 'inline-block' : 'none';
+            }
+
+            function saveChanges() {
+                if (isDeleting) {
+                    document.querySelectorAll('.row-checkbox:checked').forEach(checkbox => {
+                        const userId = checkbox.dataset.id;
+                        deleteUser(userId);
+                        checkbox.closest('.user-row').remove();
+                    });
+                }
+
+                if (isEditing) {
+                    document.querySelectorAll('.user-row').forEach(row => {
+                        const roleCell = row.querySelector('.role-name');
+                        const dropdown = roleCell.querySelector('.role-dropdown');
+
+                        if (dropdown) {
+                            const newRole = dropdown.value;
+                            const userId = dropdown.dataset.id;
+                            roleCell.textContent = newRole;
+                            updateRole(userId, newRole);
+                        }
+                    });
+                }
+
+                document.querySelectorAll('.row-checkbox').forEach(checkbox => checkbox.style.display = 'none');
+                document.querySelector('.btn-save-row').style.display = 'none';
+                isEditing = false;
+                isDeleting = false;
+                document.querySelector(".editbtn").textContent = "Edit";
+            }
+
+            async function deleteUser(userId) {
+                try {
+                    const response = await fetch(`/delete/${userId}`, { method: 'DELETE' });
+                    if (!response.ok) throw new Error('Failed to delete user');
+                    console.log(`User ${userId} deleted.`);
+                } catch (error) {
+                    console.error('Error deleting user:', error);
+                }
+            }
+
+            async function updateRole(userId, newRole) {
+                try {
+                    const response = await fetch('/updateRole', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userId, role: newRole })
+                    });
+                } catch (error) {
+                    console.error("Error updating role:", error);
+                }
+            }
+
+            async function fetchUsers() {
+                try {
+                    const response = await fetch('/users');
+                    if (!response.ok) throw new Error('Failed to fetch data');
+
+                    const users = await response.json();
+                    const tableBody = document.getElementById('userTable');
+                    tableBody.innerHTML = '';
+
+                    if (users.length === 0) {
+                        tableBody.innerHTML = '<div class="row"><div class="col-12">No users found</div></div>';
+                        return;
+                    }
+
+                    users.forEach(user => {
+                        const row = `
+                            <div class="row user-row" data-id="${user.id}">
+                                <div class="col-1 grid-cell1">${user.id}</div>
+                                <div class="col-3 grid-cell1">${user.name}</div>
+                                <div class="col-2 grid-cell1 role-name">${user.role}</div>
+                                <div class="col-2 grid-cell1">
+                                    <input type="checkbox" class="row-checkbox" data-id="${user.id}" style="display: none;">
+                                </div>
+                            </div>`;
+                        tableBody.innerHTML += row;
+                    });
+                } catch (error) {
+                    console.error('Error fetching users:', error);
+                }
+            }
+        </script>
+</body>
+</html>

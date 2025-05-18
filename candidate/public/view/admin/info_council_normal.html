@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="/public/img/icon_logo.png" type="image/x-icon">
+    <title>Info Student Council Member (Normal) Candidate</title>
+    <link href="/public/css/bootstrap.min.css" rel="stylesheet">
+    <script src="/public/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="/public/css/info.css">
+    <link rel="stylesheet" href="/public/css/detail.css">
+    <script src="/public/js/header.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.16/dist/sweetalert2.all.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.16/dist/sweetalert2.min.css">
+</head>
+
+<body>
+    <h3 style="text-align: center; padding-top: 2rem; margin-bottom: 2rem;">Personal Information Student Council Member
+        (Normal) Candidate</h3>
+    <div class="container" id="candidateList">
+        <!-- Candidates will be displayed here -->
+    </div>
+
+    <script>
+        let currentUser = null;  // Variable to store the currently logged-in user
+        const candidateType = "Student Council Member (Normal)";
+
+        // Fetch the list of candidates
+        function fetchCandidates() {
+            fetch(`/api/candidates/approve?type=${encodeURIComponent(candidateType)}`)
+                .then(response => response.json())
+                .then(candidates => {
+                    const candidateListContainer = document.getElementById('candidateList');
+                    candidateListContainer.innerHTML = ''; // Clear existing list
+
+                    candidates.forEach(candidate => {
+                        const candidateCard = `
+                            <div class="d-flex align-items-center mb-3" id="candidate${candidate.id}">
+                                <div class="card-container me-5">
+                                    <div class="card">
+                                        <div class="row g-0">
+                                            <div class="col-md-2 text-center">
+                                                <img src="http://localhost:3000${candidate.picture_url}" class="img-fluid rounded-start" alt="Candidate Picture">
+                                                <div class="mt-2">No.${candidate.id}</div>
+                                            </div>
+                                            <div class="col-md-10">
+                                                <div class="card-body">
+                                                    <h5>
+                                                        <div><strong>Name:</strong> ${candidate.name}</div>
+                                                        <div><strong>Student ID:</strong> ${candidate.studentID}</div>
+                                                        <div><strong>School:</strong> ${candidate.school}</div>
+                                                        <div><strong>Major:</strong> ${candidate.major}</div>
+                                                        <button class="btn btn-primary btn-policy" data-candidate-id="${candidate.id}">View Policies</button>
+                                                        <button class="btn btn-secondary" style="background-color: gray;" onclick="editCandidate(${candidate.id}, '${candidate.name}', '${candidate.studentID}', '${candidate.school}', '${candidate.major}')">Edit</button>
+                                                    </h5>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        candidateListContainer.innerHTML += candidateCard;
+                    });
+
+                    // Add event listeners for "View Policies" button
+                    document.querySelectorAll('.btn-policy').forEach(button => {
+                        button.addEventListener('click', function () {
+                            const candidateId = this.getAttribute('data-candidate-id');
+                            fetchCandidatePolicies(candidateId);
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching candidates:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Unable to fetch candidate data.',
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                    });
+                });
+        }
+
+        function fetchCandidatePolicies(candidateId) {
+            fetch(`/api/policies/${candidateId}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Policy Data:", data);
+
+                    if (!data || data.length === 0) {
+                        Swal.fire({
+                            title: 'No Policies Found',
+                            text: 'This candidate does not have any policies.',
+                            icon: 'info',
+                            confirmButtonText: 'OK',
+                        });
+                        return;
+                    }
+
+                    let policyList = '';
+                    data.forEach(policy => {
+                        policyList += `<li>${policy.policy_detail}</li>`;
+                    });
+
+                    const policyPoster = data[0].policy_poster_url
+                        ? `<img src="http://localhost:3000${data[0].policy_poster_url}" class="img-fluid" alt="Policy Poster">`
+                        : '<p style="color: red;">No policy poster available.</p>';
+
+                    Swal.fire({
+                        title: `Policy Details`,
+                        html: `${policyPoster} 
+                        <h3>Policy Details</h3>
+                        <ul style="list-style-type: none; padding: 0;">
+                        ${policyList}
+                        </ul>`,
+                        confirmButtonText: 'Close',
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching policy data:', error);
+                });
+        }
+
+        // Fetch user data (student ID)
+        // Fetch user info from the server
+        async function fetchUserData() {
+            try {
+                const response = await fetch("/user-info");  // Adjusted to fetch from /user-info
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Assuming the response contains user data
+                    document.getElementById("userName").textContent = data.name || "No Name Available";
+                    document.getElementById("studentID").textContent = data.studentID || "Unknown ID"; // Set Student ID
+                    // Store user data globally for future use in voting
+                    window.currentUser = data;
+                } else {
+                    console.error("User not authenticated");
+                    Swal.fire({
+                        title: "Error",
+                        text: "User is not authenticated. Please log in.",
+                        icon: "error",
+                        confirmButtonText: "OK",
+                    });
+                }
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            }
+        }
+
+        // Function to handle candidate editing
+        async function editCandidate(candidateId, name, studentId, school, major, schoolId, majorId) {
+            // Fetch the list of schools
+            const schools = await fetch('/schools').then(res => res.json());
+
+            // Fetch the list of majors for the given schoolId
+            const getMajors = async (schoolId) => {
+                if (!schoolId) return [];
+                return await fetch(`/majors/${schoolId}`).then(res => res.json());
+            };
+
+            // Generate school dropdown options with the school names and id as value
+            const schoolOptions = schools.map(s => {
+                return `<option value="${s.id}" ${s.id == schoolId ? 'selected' : ''}>${s.school_name}</option>`;
+            }).join('');
+
+            // Get majors for the selected schoolId
+            let majors = await getMajors(schoolId);
+
+            // Generate major dropdown options with major names and id as value
+            let majorOptions = majors.map(m => {
+                return `<option value="${m.id}" ${m.id == majorId ? 'selected' : ''}>${m.major_name}</option>`;
+            }).join('');
+
+            // Create the modal to edit the candidate
+            Swal.fire({
+                title: `Edit Candidate No.${candidateId}`,
+                width: '700px', // Set modal width to 700px
+                html: `
+            <div class="form-group">
+                <label for='name'>Name:</label>
+                <input id='name' class='swal2-input form-control' style="width: 100%;" value='${name}'>
+            </div>
+            <div class="form-group">
+                <label for='studentId'>Student ID:</label>
+                <input id='studentId' class='swal2-input form-control' style="width: 100%;" value='${studentId}'>
+            </div>
+            <div class="form-group">
+                <label for='school'>School:</label>
+                <select id='school' class='swal2-input form-control form-select' style="width: 100%;">
+                    ${schoolOptions}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for='major'>Major:</label>
+                <select id='major' class='swal2-input form-control form-select' style="width: 100%;">
+                    ${majorOptions}
+                </select>
+            </div>
+        `,
+                didOpen: async () => {
+                    const schoolSelect = document.getElementById('school');
+                    const majorSelect = document.getElementById('major');
+
+                    // Ensure the correct major dropdown is shown for the selected school
+                    schoolSelect.addEventListener('change', async () => {
+                        const selectedSchoolId = schoolSelect.value;
+                        const newMajors = await getMajors(selectedSchoolId);
+                        majorSelect.innerHTML = newMajors.map(m => `<option value="${m.id}" ${m.id == majorId ? 'selected' : ''}>${m.major_name}</option>`).join('');
+                    });
+                },
+                showCancelButton: true,
+                confirmButtonText: 'Save',
+                preConfirm: () => {
+                    const updatedName = document.getElementById('name').value;
+                    const updatedStudentId = document.getElementById('studentId').value;
+                    const updatedSchoolId = document.getElementById('school').value;
+                    const updatedMajorId = document.getElementById('major').value;
+
+                    if (!updatedName || !updatedStudentId || !updatedSchoolId || !updatedMajorId) {
+                        Swal.showValidationMessage('Please fill in all fields');
+                    }
+
+                    return { updatedName, updatedStudentId, updatedSchoolId, updatedMajorId };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const { updatedName, updatedStudentId, updatedSchoolId, updatedMajorId } = result.value;
+
+                    fetch(`/api/updateCandidate/${candidateId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            updatedName,
+                            updatedStudentId,
+                            updatedSchoolId,
+                            updatedMajorId
+                        })
+                    })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire('Saved!', 'Candidate information updated.', 'success');
+                                fetchCandidates();
+                            } else {
+                                Swal.fire('Error', data.message || 'Something went wrong.', 'error');
+                            }
+                        })
+                        .catch(err => {
+                            Swal.fire('Error', 'Server communication failed.', 'error');
+                        });
+                }
+            });
+        }
+
+        window.onload = function () {
+            fetchCandidates();
+            fetchUserData(); // Fetch user data on page load
+        };
+    </script>
+</body>
+
+</html>

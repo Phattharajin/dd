@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="/public/img/icon_logo.png" type="image/x-icon">
+    <title>Register</title>
+    <link href="/public/css/bootstrap.min.css" rel="stylesheet">
+    <script src="/public/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="/public/css/card.css">
+    <link rel="stylesheet" href="/public/css/detail.css">
+    <script src="/public/js/header.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.16/dist/sweetalert2.all.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.16/dist/sweetalert2.min.css">
+
+    <style>
+        #imagePreview {
+            max-width: 300px;
+            max-height: 300px;
+            margin-top: 15px;
+            object-fit: contain;
+        }
+
+        .invalid {
+            border: 2px solid red;
+        }
+
+        .error-text {
+            font-size: 0.875em;
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-5">
+        <h3 class="text-center mb-4">Student Council Member (School of Study) Register</h3>
+
+        <div class="text-center mb-4">
+            <label for="uploadPicture" class="form-label">Upload JPG Image <p style="color: #E4001A;">*1080x1080 px</p>
+            </label>
+            <input type="file" class="form-control w-50 mx-auto" id="uploadPicture" accept="image/jpeg">
+            <img id="imagePreview" class="d-none mx-auto border mt-3" alt="JPG Preview">
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <input type="text" class="form-control" placeholder="Name" id="name">
+            </div>
+            <div class="col-md-6">
+                <input type="text" class="form-control" placeholder="Student ID" id="student_id">
+            </div>
+            <div class="col-md-6">
+                <select class="form-control" id="schoolDropdown">
+                    <option value="">Select School</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <select class="form-control" id="majorDropdown">
+                    <option value="">Select Major</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <input type="text" class="form-control" placeholder="Line ID" id="line_id">
+            </div>
+
+            <div class="col-md-6">
+                <select class="form-control" id="gpaxLevelDropdown" name="gpax_level" required>
+                    <option value="">Select GPA Level</option>
+                    <option value="High school transcript(1st year only)">High school transcript (1st year only)
+                    </option>
+                    <option value="Bachelor transcript">Bachelor transcript</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <input type="text" class="form-control" placeholder="GPAX" id="gpax">
+            </div>
+            <div class="col-md-6">
+                <label for="uploadTranscript" class="form-label">Upload Your Transcript</label>
+                <input type="file" class="form-control w-50 mx-auto" id="uploadTranscript" accept="image/jpeg">
+            </div>
+
+            <h3 class="text-center mt-5 mb-4">Candidate Policy</h3>
+
+            <div id="policyDetails" class="mt-4">
+                <input type="text" class="form-control mb-3" placeholder="Policy Detail 1">
+                <input type="text" class="form-control mb-3" placeholder="Policy Detail 2">
+                <input type="text" class="form-control mb-3" placeholder="Policy Detail 3">
+                <input type="text" class="form-control mb-3" placeholder="Policy Detail 4">
+                <input type="text" class="form-control mb-3" placeholder="Policy Detail 5">
+            </div>
+
+            <div class="mb-4">
+                <label for="uploadPoster" class="form-label">Upload Poster for Policy (Optional)</label>
+                <input type="file" class="form-control w-50 mx-auto" id="uploadPoster" accept="image/jpeg">
+            </div>
+
+            <div class="mt-3">
+                <button id="addMore" class="btn text-white" style="background-color: #b38a3d; border: none;">Add
+                    More Policy</button>
+            </div>
+
+            <div class="text-center mb-5">
+                <button id="submit" class="btn text-white" style="background-color: #E4001A; border: none;"
+                    type="button">SUBMIT</button>
+            </div>
+        </div>
+        <input type="hidden" id="candidateType" value="Student Council Member (School of Study)">
+
+
+        <script>
+            document.addEventListener("DOMContentLoaded", async function () {
+                const requiredFields = [
+                    "name", "student_id", "schoolDropdown", "majorDropdown", "line_id", "gpax", "gpaxLevelDropdown", "uploadPicture", "uploadTranscript"
+                ];
+
+                // Validation function
+                function validateForm() {
+                    let isValid = true;
+
+                    requiredFields.forEach(id => {
+                        const element = document.getElementById(id);
+
+                        if (element) {
+                            if (!element.value || (element.type === "file" && element.files.length === 0)) {
+                                element.classList.add("invalid");
+
+                                // Only add error text if not already added
+                                if (!element.nextElementSibling || !element.nextElementSibling.classList.contains("error-text")) {
+                                    const errorText = document.createElement("div");
+                                    errorText.className = "error-text text-danger";
+                                    errorText.textContent = "This field is required";
+                                    element.parentNode.appendChild(errorText);
+                                }
+                                isValid = false;
+                            } else {
+                                // Clear the errors if input is valid
+                                element.classList.remove("invalid");
+                                const next = element.nextElementSibling;
+                                if (next && next.classList.contains("error-text")) {
+                                    next.remove();
+                                }
+                            }
+                        }
+                    });
+
+                    return isValid;
+                }
+
+                // Helper function to add error text
+                function addErrorText(element, message) {
+                    const errorText = element.parentNode.querySelector(".error-text");
+                    if (errorText) {
+                        errorText.textContent = message;
+                    } else {
+                        const errorText = document.createElement("div");
+                        errorText.className = "error-text text-danger";
+                        errorText.textContent = message;
+                        element.parentNode.appendChild(errorText);
+                    }
+                }
+
+                // Remove red box and error when typing
+                requiredFields.forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.addEventListener("input", function () {
+                            if (id === "student_id") {
+                                if (!/^\d*$/.test(element.value)) {
+                                    element.classList.add("invalid");
+                                    addErrorText(element, "Student ID must contain only numbers");
+                                } else if (element.value.length !== 10) {
+                                    element.classList.add("invalid");
+                                    addErrorText(element, "Student ID must be exactly 10 digits");
+                                } else {
+                                    element.classList.remove("invalid");
+                                    const next = element.nextElementSibling;
+                                    if (next && next.classList.contains("error-text")) {
+                                        next.remove();
+                                    }
+                                }
+                            } else if (id === "gpax") {
+                                if (!/^\d+(\.\d+)?$/.test(element.value)) {
+                                    element.classList.add("invalid");
+                                    addErrorText(element, "GPAX must be a valid number");
+                                } else {
+                                    element.classList.remove("invalid");
+                                    const next = element.nextElementSibling;
+                                    if (next && next.classList.contains("error-text")) {
+                                        next.remove();
+                                    }
+                                }
+                            } else {
+                                if (element.classList.contains("invalid")) {
+                                    element.classList.remove("invalid");
+                                    const next = element.nextElementSibling;
+                                    if (next && next.classList.contains("error-text")) {
+                                        next.remove();
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+
+                document.getElementById("addMore").addEventListener("click", () => {
+                    const policyDetails = document.getElementById("policyDetails");
+                    const newInput = document.createElement("input");
+                    newInput.type = "text";
+                    newInput.className = "form-control mb-3";
+                    newInput.placeholder = `Policy Detail ${policyDetails.children.length + 1}`;
+                    policyDetails.appendChild(newInput);
+                });
+
+                // Function to preview the picture upload
+                function previewFile(inputId, previewId) {
+                    const file = document.getElementById(inputId).files[0];
+                    const reader = new FileReader();
+
+                    reader.onload = function (e) {
+                        const preview = document.getElementById(previewId);
+                        preview.src = e.target.result;
+                        preview.classList.remove('d-none');
+                    };
+
+                    if (file) {
+                        reader.readAsDataURL(file);
+                    }
+                }
+
+                
+                async function uploadFiles() {
+                    const studentId = document.getElementById("student_id").value;
+                    if (!studentId) {
+                        alert("Please enter Student ID");
+                        return;
+                    }
+
+                    const formData = new FormData();
+                    formData.append("picture", document.getElementById("uploadPicture").files[0]);
+                    formData.append("transcript", document.getElementById("uploadTranscript").files[0]);
+                    formData.append("poster", document.getElementById("uploadPoster").files[0]);
+
+                    const response = await fetch(`http://localhost:3000/upload/${studentId}`, {
+                        method: "POST",
+                        body: formData
+                    });
+
+                    const result = await response.json();
+                    alert(result.message);
+                }
+
+                document.getElementById("uploadPicture").addEventListener("change", function () {
+                    previewFile("uploadPicture", "imagePreview");
+                });
+
+                // Fetch schools and populate dropdown
+                async function fetchSchools() {
+                    try {
+                        const response = await fetch("http://localhost:3000/schools");
+                        const schools = await response.json();
+                        const schoolDropdown = document.getElementById("schoolDropdown");
+                        schoolDropdown.innerHTML = `<option value="">Select School</option>`;
+                        schools.forEach(school => {
+                            const option = document.createElement("option");
+                            option.value = school.id;
+                            option.textContent = school.school_name;
+                            schoolDropdown.appendChild(option);
+                        });
+                    } catch (error) {
+                        console.error("Error fetching schools:", error);
+                    }
+                }
+
+                // Fetch majors based on selected school
+                async function fetchMajors(schoolId) {
+                    try {
+                        const response = await fetch(`http://localhost:3000/majors/${schoolId}`);
+                        const majors = await response.json();
+                        const majorDropdown = document.getElementById("majorDropdown");
+                        majorDropdown.innerHTML = `<option value="">Select Major</option>`;
+                        majors.forEach(major => {
+                            const option = document.createElement("option");
+                            option.value = major.id;
+                            option.textContent = major.major_name;
+                            majorDropdown.appendChild(option);
+                        });
+                    } catch (error) {
+                        console.error("Error fetching majors:", error);
+                    }
+                }
+
+                // Handle school selection change
+                document.getElementById("schoolDropdown").addEventListener("change", function () {
+                    const selectedSchoolId = this.value;
+                    if (selectedSchoolId) {
+                        fetchMajors(selectedSchoolId);
+                    } else {
+                        document.getElementById("majorDropdown").innerHTML = `<option value="">Select Major</option>`;
+                    }
+                });
+                // Form submit event
+                document.getElementById("submit").addEventListener("click", async (event) => {
+                    event.preventDefault(); // Prevent submission to validate first
+
+                    if (validateForm()) {
+                        await submitCandidateForm();
+                    } else {
+                        Swal.fire("Error", "Please fill in all required fields", "error");
+                    }
+                });
+
+                // Submit candidate form
+                async function submitCandidateForm() {
+                    // Get the policies
+                    const policies = [];
+                    document.querySelectorAll("#policyDetails input").forEach(input => {
+                        if (input.value.trim()) policies.push(input.value);
+                    });
+
+                    // Check if at least 3 policies are added
+                    if (policies.length < 3) {
+                        // Show error message for policy fields
+                        const policyDetails = document.getElementById("policyDetails");
+                        let errorText = document.getElementById("policyErrorText");
+
+                        if (!errorText) {
+                            errorText = document.createElement("div");
+                            errorText.id = "policyErrorText";
+                            errorText.className = "error-text text-danger";
+                            errorText.textContent = "Please provide at least 3 policy details.";
+                            policyDetails.appendChild(errorText);
+                        }
+
+                        Swal.fire("Error", "Please provide at least 3 policy details", "error");
+                        return; // Stop submission if less than 3 policies
+                    }
+
+                    // Remove error message if policies are enough
+                    const errorText = document.getElementById("policyErrorText");
+                    if (errorText) {
+                        errorText.remove();
+                    }
+
+                    const formData = new FormData();
+                    formData.append("name", document.getElementById("name").value);
+                    formData.append("studentID", document.getElementById("student_id").value);
+                    formData.append("school_id", document.getElementById("schoolDropdown").value);
+                    formData.append("major_id", document.getElementById("majorDropdown").value);
+                    formData.append("line_id", document.getElementById("line_id").value);
+                    formData.append("gpax", document.getElementById("gpax").value);
+                    formData.append("gpax_level", document.getElementById("gpaxLevelDropdown").value);
+                    formData.append("candidate_type", "Student Council Member (School of Study) ");
+                    formData.append("picture", document.getElementById("uploadPicture").files[0]);
+                    formData.append("transcript", document.getElementById("uploadTranscript").files[0]);
+                    formData.append("policy_poster", document.getElementById("uploadPoster").files[0]);
+
+                    try {
+                        const response = await fetch("http://localhost:3000/register-candidate", {
+                            method: "POST",
+                            body: formData
+                        });
+
+                        if (!response.ok) throw new Error("Registration failed");
+
+                        const result = await response.json();
+
+                        // Submit policies
+                        for (const policy of policies) {
+                            await fetch("http://localhost:3000/submit-policy", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ candidate_id: result.candidate_id, policy_detail: policy })
+                            });
+                        }
+
+                        Swal.fire("Success", "Registration completed!", "success").then(() => {
+                            window.location.href = 'http://localhost:3000/home';
+                        });
+
+                    } catch (error) {
+                        console.error("Error during submission:", error);
+                        Swal.fire("Error", "Registration failed", "error");
+                    }
+                }
+                // Fetch initial data
+                await fetchSchools();
+            });
+        </script>
+</body>
+
+</html>

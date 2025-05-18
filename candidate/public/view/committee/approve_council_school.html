@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="/public/img/icon_logo.png" type="image/x-icon">
+    <title>Permission</title>
+    <link href="/public/css/bootstrap.min.css" rel="stylesheet">
+    <script src="/public/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="/public/css/info.css">
+    <link rel="stylesheet" href="/public/css/detail.css">
+    <script src="/public/js/header.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.16/dist/sweetalert2.all.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.16/dist/sweetalert2.min.css">
+
+</head>
+
+<body>
+    <h3 style="text-align: center; padding-top: 2rem; margin-bottom: 2rem;">Personal Information - Student council member (School of study)</h3>
+
+    <div class="container" id="candidateList">
+        <!-- Candidates will be dynamically added here -->
+    </div>
+
+    <script>
+        // Fetch Candidates Function
+        async function fetchCandidates(candidateType) {
+            try {
+                // ใช้ encodeURIComponent เพื่อจัดการกับช่องว่างและเครื่องหมายพิเศษ
+                const response = await fetch(`/api/pending?type=${encodeURIComponent(candidateType)}`);
+                const candidates = await response.json();
+
+                const candidateListContainer = document.getElementById('candidateList');
+                candidateListContainer.innerHTML = ''; // Clear previous data
+
+                if (candidates.length === 0) {
+                    // แสดงข้อความเมื่อไม่มีผู้สมัคร
+                    candidateListContainer.innerHTML = '<p style="text-align: center; font-size: 18px;">No candidates available</p>';
+                } else {
+                    candidates.forEach(candidate => {
+                        const statusColor = candidate.status === "Approved" ? "green" : "red";
+
+                        const candidateCard = `
+                    <div class="d-flex align-items-center mb-3" id="candidate${candidate.id}">
+                        <div class="card-container me-5">
+                            <div class="card">
+                                <div class="row g-0">
+                                    <div class="col-md-3 text-center">
+                                        <img src="${candidate.picture_url || '/public/img/default.jpg'}" class="img-fluid rounded-start" alt="Candidate Picture">
+                                        <div class="mt-2">No.${candidate.id}</div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <div class="card-body ms-2">
+                                            <h5>
+                                                <div><strong>Name:</strong> ${candidate.name}</div>
+                                                <div><strong>Student ID:</strong> ${candidate.studentID}</div>
+                                                <div><strong>School:</strong> ${candidate.school}</div>
+                                                <div><strong>Major:</strong> ${candidate.major}</div>
+                                                <div><strong>Line ID:</strong> ${candidate.line_id || 'N/A'}</div>
+                                                <div><strong>GPAX Level:</strong> ${candidate.gpax_level || 'N/A'}</div>
+                                                <div><strong>GPAX:</strong> ${candidate.gpax || 'N/A'}</div>
+                                                <div><strong>Status:</strong> <span style="color: ${statusColor}; font-weight: bold;">${candidate.status}</span></div>
+                                                <button class="btn btn-primary btn-policy ms-2" data-candidate-id="${candidate.id}">View Policies</button>
+                                                <button class="btn btn-info btn-transcript ms-2" data-candidate-id="${candidate.id}">View Transcript</button>
+                                            </h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="button-wrapper col-md-1">
+                            <button class="btn-approve" data-candidate-id="${candidate.id}">Approve</button>
+                            <button class="btn-reject" data-candidate-id="${candidate.id}">Reject</button>
+                        </div>
+                    </div>
+                `;
+                        candidateListContainer.innerHTML += candidateCard;
+                    });
+
+                    // Add Event Listeners to Approve and Reject Buttons
+                    document.querySelectorAll('.btn-approve').forEach(button => {
+                        button.addEventListener('click', function () {
+                            const candidateId = this.getAttribute('data-candidate-id');
+                            updateCandidateStatus(candidateId, 'Approved');
+                        });
+                    });
+
+                    document.querySelectorAll('.btn-reject').forEach(button => {
+                        button.addEventListener('click', function () {
+                            const candidateId = this.getAttribute('data-candidate-id');
+                            updateCandidateStatus(candidateId, 'Rejected');
+                        });
+                    });
+
+                    document.querySelectorAll('.btn-policy').forEach(button => {
+                        button.addEventListener('click', function () {
+                            const candidateId = this.getAttribute('data-candidate-id');
+                            fetchCandidatePolicies(candidateId);
+                        });
+                    });
+
+                    document.querySelectorAll('.btn-transcript').forEach(button => {
+                        button.addEventListener('click', function () {
+                            const candidateId = this.getAttribute('data-candidate-id');
+                            fetchCandidateTranscript(candidateId);  // Call the updated function
+                        });
+                    });
+                }
+
+            } catch (error) {
+                console.error('Error fetching candidates:', error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Unable to fetch candidate data.',
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                });
+            }
+        }
+
+
+        // Function to Update Candidate Status (Approve/Reject)
+        async function updateCandidateStatus(candidateId, newStatus) {
+            try {
+                // ค้นหาการ์ดที่ถูกกด
+                const cardElement = document.getElementById(`candidate${candidateId}`);
+
+                // ส่งคำขออัปเดตสถานะไปยัง API
+                const response = await fetch(`/api/candidates/${candidateId}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                if (response.ok) {
+                    // แสดงข้อความสำเร็จ
+                    Swal.fire({
+                        title: `Candidate ${newStatus}!`,
+                        text: `The candidate has been marked as ${newStatus}.`,
+                        icon: "success",
+                        confirmButtonText: "OK",
+                    }).then(() => {
+                        // ลบการ์ดผู้สมัครออกจากหน้าเว็บหลังจากสถานะเปลี่ยน
+                        cardElement.remove();  // ลบการ์ดที่เป็น HTML element ออก
+                    });
+                } else {
+                    throw new Error("Failed to update status");
+                }
+            } catch (error) {
+                console.error('Error updating candidate status:', error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Unable to update candidate status.',
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                });
+            }
+        }
+        // Function to Fetch Policies
+        async function fetchCandidatePolicies(candidateId) {
+            try {
+                const response = await fetch(`/api/policies/${candidateId}`);
+                const data = await response.json();
+
+                if (data.length === 0) {
+                    Swal.fire({
+                        title: 'No Policies Found',
+                        text: 'This candidate does not have any policies.',
+                        icon: 'info',
+                        confirmButtonText: 'OK',
+                    });
+                    return;
+                }
+
+                let policyList = '';
+                data.forEach(policy => {
+                    policyList += `<li>${policy.policy_detail}</li>`;
+                });
+
+                const policyPoster = data[0].policy_poster_url ? `<img src="${data[0].policy_poster_url}" class="img-fluid" alt="Policy Poster">` : '';
+
+                Swal.fire({
+                    title: "Policy Details",
+                    html: `
+                        ${policyPoster}
+                        <ul style="list-style-type: none; padding: 0;">
+                            ${policyList}
+                        </ul>
+                    `,
+                    confirmButtonText: 'Close',
+                });
+
+            } catch (error) {
+                console.error('Error fetching policy data:', error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Unable to fetch policy details.',
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                });
+            }
+        }
+
+        // Function to View Transcript
+        async function fetchCandidateTranscript(candidateId) {
+            try {
+                // Fetch the transcript URL from the backend API
+                const response = await fetch(`/api/candidates/${candidateId}/transcript`);
+
+                // If the transcript URL is not found or if the candidate doesn't exist
+                if (response.status === 404) {
+                    Swal.fire({
+                        title: 'No Transcript Found',
+                        text: 'This candidate has not uploaded a transcript.',
+                        icon: 'info',
+                        confirmButtonText: 'OK',
+                    });
+                    return;
+                }
+
+                // Parse the response data
+                const data = await response.json();
+
+                // If the transcript URL exists, display it
+                if (data.transcript_url) {
+                    const transcriptImage = `<img src="${data.transcript_url}" class="img-fluid" alt="Transcript Image">`;
+                    Swal.fire({
+                        title: "Candidate's Transcript",
+                        html: transcriptImage,
+                        confirmButtonText: 'Close',
+                    });
+                } else {
+                    // In case the URL is empty or invalid
+                    Swal.fire({
+                        title: 'No Transcript Available',
+                        text: 'This candidate does not have a valid transcript.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                    });
+                }
+
+            } catch (error) {
+                console.error('Error fetching transcript data:', error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Unable to fetch transcript details.',
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                });
+            }
+        }
+
+
+
+        window.onload = () => fetchCandidates('Student Council Member (School of Study)');
+    </script>
+</body>

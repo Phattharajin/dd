@@ -1,0 +1,35 @@
+h2 {
+  text-align: center;
+}
+
+#pieChart {
+  width: 30%;
+  margin: auto;
+}
+
+th {
+  background-color: #F6D072 !important;
+  color: black !important;
+  font-weight: bold !important;
+}
+
+table {
+  width: 70% !important;
+  margin: 20px auto !important;
+  border-collapse: collapse !important;
+}
+
+th,
+td {
+  padding: 8px 10px !important;
+  text-align: center !important;
+  border: 1px solid #ddd !important;
+}
+
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+tr:hover {
+  background-color: #ddd;
+}

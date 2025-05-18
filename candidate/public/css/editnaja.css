@@ -1,0 +1,154 @@
+h2#swal2-title {
+    font-size: 40px;
+    font-family: 'Mitr', sans-serif;
+    color: black;
+}
+
+div#swal2-html-container {
+    font-size: 20px;
+    font-family: 'Mitr', sans-serif;
+    color: black;
+    line-height: 1.5;
+}
+
+#editTextBtn{
+    background-color: #f9cc5a;
+    font-size: large;
+    color: rgb(255, 255, 255);
+    width: 160px; 
+    height: 40px;
+    border: none;
+}
+#editTextBtn:hover{
+    background-color: #eaa800;
+}
+#deleteBtn {
+    background-color: #cc5863;
+    /* สีแดง */
+    color: white;
+    border: none;
+    width: 160px; 
+    height: 50px;
+}
+#deleteBtn:hover {
+    background-color: rgb(168, 10, 10);
+}
+
+#saveChangesBtn{
+    background-color: rgb(0, 179, 255);
+    border: none;
+}
+
+ /* Style for editable header */
+ #headerText[contenteditable="true"] {
+    padding: 10px;
+    background-color: #f8f9fa; /* Light background */
+    color: #6c757d; /* Default gray text color */
+    font-style: italic; /* Italic style for editability */
+    border: 2px dashed transparent; /* No border by default */
+}
+
+#headerText[contenteditable="true"]:focus {
+    background-color: #fff; /* Change background on focus */
+    border-color: #28a745; /* Green border on focus */
+    color: #000; /* Change text color when focused */
+}
+
+/* Blinking effect for the placeholder when editing is not enabled */
+#headerText[contenteditable="true"]:empty:before {
+    content: "Click Edit to change text"; /* Placeholder text */
+    color: #007bff; /* Blue color for the placeholder text */
+    font-weight: bold;
+    font-style: italic;
+    animation: blink 1.5s step-end infinite; /* Make text blink */
+}
+
+/* Blinking effect for the placeholder */
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}
+
+/* Make the cursor pointer when hovering over editable text */
+#headerText[contenteditable="true"]:hover {
+    cursor: pointer;
+}
+
+/* Style when Edit button is clicked */
+#headerText.editable {
+    border: 2px dashed #007bff; /* Dashed border to indicate editability */
+}
+
+/* Resize Edit Button */
+#editTextBtn {
+    font-size: 16px; /* Slightly larger font size for the button */
+    padding: 10px 20px; /* Adjust padding for larger button */
+    margin-bottom: 20px;
+}
+
+/* Style for the message under image upload */
+#uploadMessage {
+    color: #a72828; /* Green color for the instructional text */
+    font-weight: bold; /* Make the text bold */
+}
+
+/* Resize Edit Text button to match size of image Edit buttons */
+.btn-sm {
+    font-size: 14px; /* Adjust the font size */
+    padding: 6px 12px; /* Adjust padding */
+}
+
+/* Add margin to separate the upload section and edit button */
+.edit-btn-container {
+    margin-top: 20px; /* Increase space between upload and edit button */
+}
+.btn-warning {
+    background-color: #f9cc5a !important;
+    border-color: #f9cc5a !important;
+    color: white !important;
+}
+
+.btn-warning:hover {
+    background-color: #eaa800 !important;
+    border-color: #eaa800 !important;
+}
+
+.btn-danger {
+    background-color: #cc5863 !important;
+    border-color: #cc5863 !important;
+    color: white !important;
+}
+
+.btn-danger:hover {
+    background-color: #a83b45 !important; /* โทนเข้มขึ้นเวลา hover */
+    border-color: #a83b45 !important;
+}
+.image-item {
+    display: flex;
+    flex-direction: column; /* ให้แนวตั้ง */
+    align-items: center; /* จัดกลางในแนวนอน */
+    justify-content: center; /* จัดกลางในแนวตั้ง */
+    text-align: center; /* จัดข้อความให้อยู่กลาง */
+    margin: 10px;
+}
+
+.image-item img {
+    max-width: 100%; /* ขนาดรูปไม่เกินขนาดที่กำหนด */
+    height: auto;
+}
+
+.btn-container {
+    display: flex;
+    gap: 10px; 
+    justify-content: space-between; 
+    margin-top: 10px; 
+}
+
+/* ปรับขนาดของปุ่มให้เท่ากัน */
+.btn-container .btn {
+    flex: 1; 
+    height: 40px; 
+    font-size: 14px; 
+    width: 100px; 
+}

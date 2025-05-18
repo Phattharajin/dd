@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Total Score</title>
+    <link rel="shortcut icon" href="/public/img/icon_logo.png" type="image/x-icon">
+    <link href="/public/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/public/css/dashboard.css" rel="stylesheet" />
+    <script src="/public/js/header.js"></script>
+    <script src="/public/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+
+</head>
+
+<body>
+    <h2 class="p-3 text-center">Election Score: President of the Student Association</h2>
+
+    <div id="pieChart">
+        <canvas id="scorePieChart" class="p-5"></canvas>
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Number</th>
+                <th>Name</th>
+                <th>ID</th>
+                <th>School</th>
+                <th>Votes</th>
+                <th>Percentage</th>
+            </tr>
+        </thead>
+        <tbody id="candidatesTable">
+            <!-- Dynamic rows will be inserted here -->
+        </tbody>
+    </table>
+
+    <script>
+        // Fetch approved candidates and their scores
+        // Fetch approved candidates based on candidate type
+        async function fetchCandidates(candidateType) {
+            try {
+                const response = await fetch(`/api/candidates/pending-scores?type=${encodeURIComponent(candidateType)}`);
+                const candidates = await response.json();
+
+                const tableBody = document.getElementById('candidatesTable');
+                tableBody.innerHTML = ''; // Clear the table
+
+                // Calculate total votes for pie chart
+                let totalVotes = 0;
+                const voteData = candidates.map(candidate => {
+                    totalVotes += candidate.vote_count;
+                    return {
+                        name: candidate.name,
+                        votes: candidate.vote_count
+                    };
+                });
+
+                // Populate the table with candidates and vote data
+                candidates.forEach((candidate, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${candidate.name}</td>
+                <td>${candidate.studentID}</td>
+                <td>${candidate.school}</td>
+                <td>${candidate.vote_count}</td>
+                <td>${((candidate.vote_count / totalVotes) * 100).toFixed(2)}%</td>
+            `;
+                    tableBody.appendChild(row);
+                });
+
+                // Pie chart data
+                const data = {
+                    datasets: [{
+                        label: 'Vote Distribution',
+                        data: voteData.map(item => item.votes),
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
+                        hoverOffset: 4
+                    }]
+                };
+
+                const config = {
+                    type: 'pie',
+                    data: data,
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: true
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (tooltipItem) {
+                                        // Display the percentage value in the tooltip
+                                        const percentage = ((tooltipItem.raw / totalVotes) * 100).toFixed(2);
+                                        return `${tooltipItem.label}: ${percentage}%`;
+                                    }
+                                }
+                            },
+                            datalabels: {
+                                color: 'white',
+                                font: { size: 20, weight: 'bold' },
+                                formatter: (value) => {
+                                    // Calculate and display the percentage for each section
+                                    const percentage = ((value / totalVotes) * 100).toFixed(2);
+                                    return `${percentage}%`;  // Display percentage
+                                },
+                                anchor: 'center',
+                                align: 'center'
+                            }
+                        }
+                    },
+                    plugins: [ChartDataLabels]
+                };
+
+                const ctx = document.getElementById('scorePieChart').getContext('2d');
+                new Chart(ctx, config);
+            } catch (error) {
+                console.error('Error fetching candidates:', error);
+            }
+        }
+
+        window.onload = function () {
+            fetchCandidates('President of the Faculty Student Council');
+        };
+
+    </script>
+</body>
+
+</html>

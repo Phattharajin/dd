@@ -1,0 +1,13 @@
+election-su.mfu.ac.th
+ip : 192.168.11.35
+user : elec
+password : g]nvd9yh'oydL7dKk#558**
+โดยที่ user elec สามารถ sudo su - เป็น root ได้
+ssh elec@192.168.11.35
+
+
+**vpn**
+Phattharajin Joyjaroen
+     User:  phattharajin_joy
+     Pass: ryfmtit0bo@MFU2025
+

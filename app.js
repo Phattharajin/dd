@@ -1,6 +1,5 @@
 const express = require('express');
 require("dotenv").config();
-const router = express.Router();
 const session = require("express-session");
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
@@ -8,244 +7,62 @@ const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const mysql = require('mysql2');
-const path = require('path');  // Required for file path handling
+const fs = require('fs');
+const path = require('path');
 const app = express();
-const cors = require('cors');
-app.use(cors()); 
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+const cors = require("cors");
+const fileUpload = require('express-fileupload');
+const router = express.Router();
 
+app.use(cors());
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.static(path.join(__dirname, 'view')));
-app.use(express.static(path.join(__dirname, 'admin')));
-app.use(express.static(path.join(__dirname, 'user')));
-app.use(express.static(path.join(__dirname, 'comittee')));
-// Serve static files from "public" folder
 
-// Database connection setup
 const db = mysql.createConnection({
     host: 'localhost',
-    user: 'root',  // Change to your MySQL username
-    database: 'candidate2'  // Change to your database name
+    user: 'root',
+    database: 'candidate1'
 });
 
-// Connect to the database
 db.connect(err => {
     if (err) {
         console.error('Database connection failed:', err.stack);
         return;
     }
-    console.log('Connected to the database.');
+    console.log('Connect to the database.');
 });
 
-app.use("/public", express.static("D:/ProjectH/public"));
-app.use("/view", express.static("D:/ProjectH/view"));
-app.use("/admin", express.static("D:/ProjectH/view/admin"));
-app.use("/user", express.static("D:/ProjectH/view/user"));
-app.use("/comittee", express.static("D:/ProjectH/view/committee"));
+app.use("/public", express.static("D:/candidate/public"));
 
 
-// Serve the login page when the user visits "/login"
-app.get('/login', (req, res) => {
-    // Serve the login.html file from the "public" folder
-    res.sendFile(path.join('D:/ProjectH/view/user/login.html'));
+app.get("/home", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/home.html"));
 });
 
-
-app.get('/home', (req, res) => {
-    res.sendFile(path.join('D:/ProjectH/view/user/home.html'));
+app.get("/admin_home", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/admin_home.html"));
 });
 
-app.get('/admin_home', (req, res) => {
-    res.sendFile(path.join('D:/ProjectH/view/admin/admin_home.html'));
+app.get("/committee_home", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/committee_home.html"));
 });
 
-app.get('/committee_home', (req, res) => {
-    res.sendFile(path.join('D:/ProjectH/view/committee/committee_home.html'));
+app.get("/login", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/login.html"));
 });
 
-app.get('/PDPA_president', (req, res) => {
-    res.sendFile(path.join('D:/projectH/view/user/PDPA_president.html'));
+app.get("/loginstaff", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/loginstaff.html"));
 });
 
-app.get('/PDPA_council_school', (req, res) => {
-    res.sendFile(path.join('D:/projectH/view/user/PDPA_council_school.html'));
+app.get("/add_staff", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/add_staff.html"));
 });
 
-app.get('/PDPA_council_normal', (req, res) => {
-    res.sendFile(path.join('D:/projectH/view/user/PDPA_council_normal.html'));
+app.get("/change_password", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/change_password.html"));
 });
-app.get('/election_result_menu', (req, res) => {
-    res.sendFile(path.join('D:/projectH/view/user/election_result_menu.html'));
-});
-
-app.get('/vote_president_student', (req, res) => {
-    res.sendFile(path.join('D:/projectH/view/user/vote_president_student.html'));
-});
-
-app.get('/vote_council_school', (req, res) => {
-    res.sendFile(path.join('D:/projectH/view/user/vote_council_school.html'));
-});
-
-app.get('/vote_council_normal', (req, res) => {
-    res.sendFile(path.join('D:/projectH/view/user/vote_council_normal.html'));
-});
-
-app.get('/vote_president_faculty', (req, res) => {
-    res.sendFile(path.join('D:/projectH/view/user/vote_president_faculty.html'));
-});
-
-app.get('/condition_president', (req, res) => {
-    res.sendFile(path.join('D:/projectH/view/user/condition_president.html'));
-});
-
-
-app.get('/condition_council_school', (req, res) => {
-    res.sendFile(path.join('D:/projectH/view/user/condition_council_school.html'));
-});
-
-
-app.get('/condition_council_normal', (req, res) => {
-    res.sendFile(path.join('D:/projectH/view/user/condition_council_normal.html'));
-});
-
-app.get('/result_president_student', (req, res) => {
-    res.sendFile(path.join('D:/projectH/view/user/result_president_student.html'));
-});
-
-app.get('/result_council_school', (req, res) => {
-    res.sendFile(path.join('D:/projectH/view/user/result_council_school.html'));
-});
-
-app.get('/result_council_normal', (req, res) => {
-    res.sendFile(path.join('D:/projectH/view/user/result_council_normal.html'));
-});
-
-app.get('/result_president_faculty', (req, res) => {
-    res.sendFile(path.join('D:/projectH/view/user/result_president_faculty.html'));
-});
-
-app.get('/candidate_register_president', (req, res) => {
-    res.sendFile(path.join('D:/projectH/view/user/candidate_register_president.html'));
-});
-
-app.get('/candidate_register_council_school', (req, res) => {
-    res.sendFile(path.join('D:/projectH/view/user/candidate_register_council_school.html'));
-});
-
-app.get('/candidate_register_council_normal', (req, res) => {
-    res.sendFile(path.join('D:/projectH/view/user/candidate_register_council_normal.html'));
-});
-
-app.get("/success_president_student", (req, res) => {
-    res.sendFile(path.join("D:/projectH/view/user/success_president_student.html"));
-});
-
-app.get("/success_council_school", (req, res) => {
-    res.sendFile(path.join("D:/projectH/view/user/success_council_school.html"));
-});
-
-app.get("/success_council_normal", (req, res) => {
-    res.sendFile(path.join("D:/projectH/view/user/success_council_normal.html"));
-});
-
-app.get("/success_president_faculty", (req, res) => {
-    res.sendFile(path.join("D:/projectH/view/user/success_president_faculty.html"));
-});
-
-app.get("/list_admin", (req, res) => {
-    res.sendFile(path.join("D:/projectH/view/admin/list_admin.html"));
-});
-
-app.get("/list_user", (req, res) => {
-    res.sendFile(path.join("D:/projectH/view/admin/list_user.html"));
-});
-
-app.get("/list_candidate_menu", (req, res) => {
-    res.sendFile(path.join("D:/projectH/view/admin/list_candidate_menu.html"));
-});
-
-app.get("/datetime_setter_menu", (req, res) => {
-    res.sendFile(path.join("D:/projectH/view/admin/datetime_setter_menu.html"));
-});
-
-app.get("/add_candidate", (req, res) => {
-    res.sendFile(path.join("D:/projectH/view/admin/add_candidate.html"));
-});
-
-app.get("/election_score_menu", (req, res) => {
-    res.sendFile(path.join("D:/projectH/view/admin/election_score_menu.html"));
-});
-
-app.get("/PDPA_edit", (req, res) => {
-    res.sendFile(path.join("D:/projectH/view/admin/PDPA_edit.html"));
-});
-
-app.get("/info_president_student", (req, res) => {
-    res.sendFile(path.join("D:/projectH/view/admin/info_president_student.html"));
-});
-
-app.get("/info_add_president_student", (req, res) => {
-    res.sendFile(path.join("D:/projectH/view/admin/info_add_president_student.html"));
-});
-
-app.get("/info_council_school", (req, res) => {
-    res.sendFile(path.join("D:/projectH/view/admin/info_council_school.html"));
-});
-
-app.get("/info_add_council_school", (req, res) => {
-    res.sendFile(path.join("D:/projectH/view/admin/info_add_council_school.html"));
-});
-
-app.get("/info_council_normal", (req, res) => {
-    res.sendFile(path.join("D:/projectH/view/admin/info_council_normal.html"));
-});
-
-app.get("/info_add_council_normal", (req, res) => {
-    res.sendFile(path.join("D:/projectH/view/admin/info_add_council_normal.html"));
-});
-
-app.get("/info_president_faculty", (req, res) => {
-    res.sendFile(path.join("D:/projectH/view/admin/info_president_faculty.html"));
-});
-
-app.get("/score_president_student", (req, res) => {
-    res.sendFile(path.join("D:/projectH/view/admin/score_president_student.html"));
-});
-
-app.get("/score_council_school", (req, res) => {
-    res.sendFile(path.join("D:/projectH/view/admin/score_council_school.html"));
-});
-
-app.get("/score_council_normal", (req, res) => {
-    res.sendFile(path.join("D:/projectH/view/admin/score_council_normal.html"));
-});
-
-app.get("/score_persident_faculty", (req, res) => {
-    res.sendFile(path.join("D:/projectH/view/admin/score_persident_faculty.html"));
-});
-
-app.get("/condition_edit_president", (req, res) => {
-    res.sendFile(path.join("D:/projectH/view/committee/condition_edit_president.html"));
-});
-
-app.get("/add_user", (req, res) => {
-    res.sendFile(path.join("D:/projectH/view/admin/add_user.html"));
-});
-
-app.get("/approve_president", (req, res) => {
-    res.sendFile(path.join("D:/projectH/view/committee/approve_president.html"));
-});
-
-app.get("/approve_council_school", (req, res) => {
-    res.sendFile(path.join("D:/projectH/view/committee/approve_council_school.html"));
-});
-
-app.get('/success_president_student', (req, res) => {
-    res.sendFile(path.join('D:/projectH/view/user/success_president_student.html'));
-});
-
 
 app.use(express.json());
 app.use(
@@ -269,57 +86,63 @@ passport.use(
         (accessToken, refreshToken, profile, done) => {
             const email = profile.emails[0].value;
 
-            // ✅ Ensure Email is from MFU
-            if (!email.endsWith("@lamduan.mfu.ac.th")) {
-                return done(null, false, { message: "Only @lamduan.mfu.ac.th emails are allowed!" });
+            // Accept only lamduan and mfu domains
+            if (!email.endsWith("@lamduan.mfu.ac.th") && !email.endsWith("@mfu.ac.th")) {
+                return done(null, false, { message: "Only @lamduan.mfu.ac.th or @mfu.ac.th emails are allowed!" });
             }
 
-            const studentID = email.split("@")[0]; // Extract Student ID
+            let name, studentID = null, role = "user", major_id = null, school_id = null;
 
-            // ✅ Check if User Exists in Database
-            db.query("SELECT * FROM users WHERE email = ?", [email], (err, results) => {
-                if (err) return done(err);
+            if (email.endsWith("@lamduan.mfu.ac.th")) {
+                studentID = email.split("@")[0];
+                name = profile.displayName;
 
-                if (results.length > 0) {
-                    // User Exists, Return Their Data
-                    return done(null, results[0]);
-                } else {
-                    // Insert New User with Default Role
-                    const newUser = {
-                        name: profile.displayName,
-                        email: email,
-                        studentID: studentID,
-                        role: "user", // Default role
-                    };
+                const schoolCode = studentID.substring(3, 5); // 4th and 5th characters
 
-                    db.query("INSERT INTO users SET ?", newUser, (err, insertResult) => {
-                        if (err) return done(err);
-                        newUser.id = insertResult.insertId;
-                        return done(null, newUser);
-                    });
-                }
-            });
+                // Query school_id from school_codes table
+                db.query("SELECT school_id FROM school_codes WHERE school_code = ?", [schoolCode], (err, schoolResults) => {
+                    if (err) return done(err);
+
+                    if (schoolResults.length > 0) {
+                        school_id = schoolResults[0].school_id;
+                    }
+
+                    // Continue with user check or insert
+                    handleUserCreation();
+                });
+            } else if (email.endsWith("@mfu.ac.th")) {
+                // Only set name, no studentID/school_id
+                name = email.split("@")[0];
+                handleUserCreation();
+            }
+
+            function handleUserCreation() {
+                db.query("SELECT * FROM users WHERE email = ?", [email], (err, results) => {
+                    if (err) return done(err);
+
+                    if (results.length > 0) {
+                        return done(null, results[0]); // User already exists
+                    } else {
+                        const newUser = {
+                            name,
+                            email,
+                            studentID,
+                            role,
+                            major_id,
+                            school_id,
+                        };
+
+                        db.query("INSERT INTO users SET ?", newUser, (err, insertResult) => {
+                            if (err) return done(err);
+                            newUser.id = insertResult.insertId;
+                            return done(null, newUser);
+                        });
+                    }
+                });
+            }
         }
     )
 );
-
-// ✅ Serialize User (Store User ID in Session)
-passport.serializeUser((user, done) => {
-    done(null, user.id);
-});
-
-// ✅ Deserialize User (Fetch Full User Details)
-passport.deserializeUser((id, done) => {
-    db.query("SELECT * FROM users WHERE id = ?", [id], (err, results) => {
-        if (err) return done(err);
-        done(null, results[0]);
-    });
-});
-
-// ✅ Google OAuth Login
-app.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
-
-// ✅ Google OAuth Callback (Final Authentication Step)
 app.get(
     "/auth/google/callback",
     passport.authenticate("google", { failureRedirect: "/login?error=invalid_email" }),
@@ -334,56 +157,38 @@ app.get(
             const userRole = results[0].role;
             let redirectUrl = "/home";
 
-            if (userRole === "admin") {
-                redirectUrl = "/admin_home";
-            } else if (userRole === "committee") {
-                redirectUrl = "/committee_home";
-            }
-
-            // ✅ Issue JWT Token for API Authentication
-            const token = jwt.sign(
-                { id: req.user.id, email: req.user.email, role: userRole },
-                "your_jwt_secret",
-                { expiresIn: "1h" }
-            );
-
-            // ✅ Redirect with JWT Token
-            res.redirect(`${redirectUrl}?token=${token}&user=${encodeURIComponent(req.user.displayName)}`);
+            res.redirect(`${redirectUrl}?user=${encodeURIComponent(req.user.displayName)}`);
         });
     }
 );
 
-// ✅ Standard Login Route (For Manual Username & Password)
-app.post("/login", (req, res) => {
-    const { username, password } = req.body;
+// Serialize and Deserialize User
+passport.serializeUser((user, done) => {
+    done(null, user);
+});
+passport.deserializeUser((user, done) => {
+    done(null, user);
+});
 
-    if (username === "user" && password === "user123") {
-        const token = jwt.sign({ role: "admin" }, "your_jwt_secret", { expiresIn: "1h" });
-        res.json({ token, redirectUrl: "/home" });
-    } else {
-        res.status(401).json({ error: "Invalid credentials" });
+
+// Google OAuth Login
+app.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
+
+// Google OAuth Callback
+app.get(
+    "/auth/google/callback",
+    passport.authenticate("google", { failureRedirect: "/login" }),
+    (req, res) => {
+        res.redirect(`/home?user=${encodeURIComponent(req.user.displayName)}`);
     }
-});
+);
 
-// ✅ Protected Route (Example Usage of JWT Authentication)
-app.get("/protected", (req, res) => {
-    const token = req.headers.authorization;
-
-    if (!token) return res.status(401).json({ error: "Access denied. No token provided." });
-
-    jwt.verify(token, "your_jwt_secret", (err, decoded) => {
-        if (err) return res.status(401).json({ error: "Invalid token" });
-        res.json({ message: "Access granted", user: decoded });
-    });
-});
-
-// ✅ Logout Route (Session-Based Logout)
+// Logout Route
 app.get("/logout", (req, res) => {
     req.logout(() => {
         res.redirect("/login");
     });
 });
-
 
 app.get("/user-info", (req, res) => {
     if (!req.user) {
@@ -403,14 +208,142 @@ app.get("/user-info", (req, res) => {
         res.json({ name, studentID, email, role });
     });
 });
+
+app.get('/user-school', (req, res) => {
+    const studentID = req.query.studentID;
+
+    const query = `
+      SELECT u.studentID, s.school_name
+      FROM users u
+      JOIN school_codes sc ON SUBSTRING(u.studentID, 4, 2) = sc.school_code
+      JOIN schools s ON sc.school_id = s.id
+      WHERE u.studentID = ?
+    `;
+
+    db.execute(query, [studentID], (err, results) => {
+        if (err) {
+            return res.status(500).json({ message: "Internal server error" });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ message: "School not found for the given student ID" });
+        }
+
+        res.json(results[0]);
+    });
+});
+
+
+app.get('/faculty', (req, res) => {
+    const studentID = req.user.studentID;
+
+    const query = `
+      SELECT s.school_color, sc.school_code
+      FROM users u
+      JOIN school_codes sc ON SUBSTRING(u.studentID, 4, 2) = sc.school_code
+      JOIN schools s ON sc.school_id = s.id
+      WHERE u.studentID = ?
+    `;
+
+    db.execute(query, [studentID], (err, results) => {
+        if (err) {
+            return res.status(500).json({ message: "Internal server error" });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ message: "School not found for the given student ID" });
+        }
+
+        const { school_color, school_code } = results[0];
+        res.json({ schoolColor: school_color, schoolCode: school_code });
+    });
+});
+
 const multer = require("multer");
 const upload = multer({ dest: "uploads/" });
 
 const storage = multer.diskStorage({
     destination: "uploads/",
     filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
+        cb(null, Date.now() + path.extname(file.originalname));
     }
+});
+
+app.use('/uploads', express.static(path.join(__dirname, 'upload')));
+app.use('/uploads', express.static('uploads'));
+
+app.post('/uploads', upload.single('file'), (req, res) => {
+    const fileUrl = `/uploads/${req.file.filename}`;
+    res.json({ fileUrl });
+});
+
+
+app.post("/update-slide/:id", upload.single("image"), (req, res) => {
+    const { id } = req.params;
+    const textDetail = req.body.textDetail;
+    const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
+
+    let sql = "UPDATE slides SET textDetail = ?";
+    let values = [textDetail];
+
+    if (req.file) {
+        sql += ", imagePath = ?";
+        values.push(imagePath);
+    }
+
+    sql += " WHERE id = ?";
+    values.push(id);
+
+    db.query(sql, values, (err, result) => {
+        if (err) {
+            return res.status(500).json({
+                success: false,
+                message: "Database Error",
+                error: err
+            });
+        }
+
+        res.json({
+            success: true,
+            message: "Slide updated successfully",
+            imagePath: imagePath || ""
+        });
+    });
+});
+
+app.get('/get-slides', (req, res) => {
+    const sql = 'SELECT textDetail, imagePath FROM slides';
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error("Database Error: ", err);
+            return res.status(500).json({ error: err.message });
+        }
+        console.log("Slides fetched from database:", results);
+        res.json(results);
+    });
+});
+
+async function fetchSlides() {
+    try {
+        const response = await fetch('http://localhost:3000/get-slides');
+        slides = await response.json();
+        console.log(slides);
+        renderSlides();
+    } catch (error) {
+        console.error('Error fetching slides:', error);
+    }
+}
+
+app.get("/register_president", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/register_president.html"));
+});
+
+app.get("/register_council_school", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/register_council_school.html"));
+});
+
+app.get("/register_council_normal", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/register_council_normal.html"));
 });
 
 app.post("/register-candidate", upload.fields([
@@ -418,23 +351,14 @@ app.post("/register-candidate", upload.fields([
     { name: "transcript", maxCount: 1 },
     { name: "policy_poster", maxCount: 1 }
 ]), (req, res) => {
-    console.log("Received Body:", req.body); // Debugging line
-    console.log("Received Files:", req.files); // Debugging line
-
     const { name, studentID, school_id, major_id, line_id, gpax, gpax_level, candidate_type } = req.body;
-
-    if (!candidate_type) {
-        return res.status(400).json({ error: "Candidate type is missing" });
-    }
-
     const picture_url = req.files["picture"] ? req.files["picture"][0].path : null;
     const transcript_url = req.files["transcript"] ? req.files["transcript"][0].path : null;
     const policy_poster_url = req.files["policy_poster"] ? req.files["policy_poster"][0].path : null;
 
     const sql = `
         INSERT INTO candidates (name, studentID, school_id, major_id, line_id, gpax, gpax_level, candidate_type, picture_url, transcript_url, policy_poster_url) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
     db.query(sql, [name, studentID, school_id, major_id, line_id, gpax, gpax_level, candidate_type, picture_url, transcript_url, policy_poster_url],
         (err, result) => {
@@ -447,7 +371,6 @@ app.post("/register-candidate", upload.fields([
     );
 });
 
-// Error Handling for File Uploads
 app.use((err, req, res, next) => {
     if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') {
         return res.status(400).json({ error: "File size exceeds 50 MB limit" });
@@ -455,7 +378,6 @@ app.use((err, req, res, next) => {
     next(err);
 });
 
-// Submit policy for a candidate
 app.post("/submit-policy", (req, res) => {
     const { candidate_id, policy_detail } = req.body;
 
@@ -469,8 +391,8 @@ app.post("/submit-policy", (req, res) => {
     });
 });
 
-// Get all schools
 
+// Get all schools
 app.get('/schools', (req, res) => {
     const query = "SELECT * FROM schools";
     db.query(query, (err, results) => {
@@ -497,7 +419,6 @@ app.get('/majors/:schoolId', (req, res) => {
 });
 
 
-
 // Get all majors
 app.get("/majors", (req, res) => {
     db.query("SELECT * FROM majors", (err, results) => {
@@ -505,8 +426,6 @@ app.get("/majors", (req, res) => {
         res.json(results);
     });
 });
-
-
 
 
 // Route to add a candidate
@@ -527,262 +446,233 @@ app.post('/candidates', async (req, res) => {
     }
 });
 
-app.post('/add-user', async (req, res) => {
-    const { username, password, role } = req.body;
+app.get("/PDPA_president", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/PDPA_president.html"));
+});
 
-    if (!username || !password || !role) {
-        return res.status(400).json({ message: "All fields are required" });
-    }
+app.get("/condition_president", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/condition_president.html"));
+});
+
+app.get("/PDPA_council_school", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/PDPA_council_school.html"));
+});
+
+app.get("/condition_council_school", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/condition_council_school.html"));
+});
+
+app.get("/PDPA_council_normal", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/PDPA_council_normal.html"));
+});
+
+app.get("/condition_council_normal", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/condition_council_normal.html"));
+});
+
+app.get('/api/header-image/:headerId', (req, res) => {
+    const headerId = req.params.headerId;
+
+    const sql = `
+      SELECT h.text AS header_text, ui.file_path
+      FROM headers h
+      LEFT JOIN uploaded_images ui ON h.id = ui.header_id
+      WHERE h.id = ?
+    `;
+
+    db.query(sql, [headerId], (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (results.length === 0) return res.status(404).json({ message: 'Not found' });
+
+        res.json({
+            header_text: results[0].header_text,
+            images: results
+                .filter(row => row.file_path) // กัน null ถ้าไม่มีรูป
+                .map(row => '/uploads/' + row.file_path.split('/').pop()) // ดึงเฉพาะชื่อไฟล์
+        });
+    });
+});
+
+
+app.get("/information_president_student", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/information_president_student.html"));
+});
+
+app.get("/information_council_school", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/information_council_school.html"));
+});
+
+app.get("/information_council_normal", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/information_council_normal.html"));
+});
+
+app.get("/information_president_faculty", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/information_president_faculty.html"));
+});
+
+//--------------vote-----------
+router.post('/api/vote', async (req, res) => {
+    const { studentId, candidateId, isAbstention } = req.body;
+
+    // If abstaining, candidateId will be null
+    const voteData = {
+        student_id: studentId,
+        candidate_id: isAbstention ? null : candidateId,
+        is_abstention: isAbstention ? 1 : 0,
+        vote_time: new Date(),
+    };
 
     try {
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        // SQL to insert user data
-        const query = `INSERT INTO users (username, password, role) VALUES (?, ?, ?)`;
-        db.query(query, [username, hashedPassword, role], (err, result) => {
-            if (err) {
-                console.error(err);
-                return res.status(500).json({ message: "User addition failed, please try again later." });
-            }
-
-            res.status(200).json({ message: "User added successfully!" });
-        });
+        // Insert the vote into the database
+        await db.query('INSERT INTO votes SET ?', voteData);
+        res.status(201).json({ message: 'Vote recorded successfully' });
     } catch (error) {
-        console.error("Error adding user:", error);
-        res.status(500).json({ message: "There was an error processing your request." });
+        console.error('Error recording vote:', error);
+        res.status(500).json({ message: 'Error recording vote' });
     }
 });
+app.use(router);
 
-app.get('/api/candidates', (req, res) => {
+// Fetch image by candidate_id (when a user votes for a candidate)
+app.get('/api/vote-picture', (req, res) => {
+    // Query ดึง candidate id จาก vote table โดยใช้ vote ล่าสุด (อาจปรับเงื่อนไขได้)
     const query = `
-      SELECT
-        c.id,
-        c.name,
-        c.studentID,
-        c.line_id,  -- ✅ Added Line ID
-        c.gpax_level,  -- ✅ Added GPAX Level
-        c.gpax,  -- ✅ Added GPAX
-        s.school_name AS school,
-        m.major_name AS major,
-        c.picture_url,
-        c.transcript_url,
-        c.policy_poster_url,
-        c.candidate_type
-        c.status  -- ✅ Added status for frontend
-      FROM candidates c
-      JOIN schools s ON c.school_id = s.id
-      JOIN majors m ON c.major_id = m.id;
+      SELECT c.picture_url 
+      FROM votes v 
+      JOIN candidates c ON v.candidate_id = c.id 
+      ORDER BY v.vote_time DESC 
+      LIMIT 1
     `;
+
     db.query(query, (err, results) => {
         if (err) {
-            console.error('Error fetching candidates:', err);
-            return res.status(500).send('Server error');
+            console.error('SQL error:', err);
+            return res.status(500).json({ error: 'Database error' });
         }
-        console.log('Fetched candidates:', results);
-
         if (results.length === 0) {
-            return res.status(404).send('No candidates found');
-        }
-        results.forEach(candidate => {
-            console.log("Before Fix:", candidate.picture_url); // Debug ก่อนแก้
-    
-            candidate.picture_url = candidate.picture_url 
-                ? `/${candidate.picture_url.replace(/\\/g, '/')} `// เอา /uploads/ ออก
-                : '/uploads/default.jpg';
-    
-            candidate.transcript_url = candidate.transcript_url 
-                ? `/${candidate.transcript_url.replace(/\\/g, '/')} `
-                : null;
-    
-            candidate.policy_poster_url = candidate.policy_poster_url 
-                ? `/${candidate.policy_poster_url.replace(/\\/g, '/')} `
-                : null;
-    
-            console.log("After Fix:", candidate.picture_url); // Debug หลังแก้
-        });
-    
-        res.json(results);
-    });
-});
-
-app.get('/api/policies/:candidate_id', (req, res) => {
-    const candidateId = req.params.candidate_id;
-    const query = `
-        SELECT p.policy_detail, c.policy_poster_url
-        FROM policies p
-        JOIN candidates c ON p.candidate_id = c.id
-        WHERE c.id = ?
-    `;
-
-    db.query(query, [candidateId], (err, results) => {
-        if (err) {
-            console.error('Error fetching policy details:', err);
-            return res.status(500).send('Unable to fetch policy details');
+            return res.status(404).json({ error: 'No vote found' });
         }
 
-        results.forEach(policy => {
-            if (policy.policy_poster_url) {
-                // ✅ แก้ path ให้ถูกต้อง
-                policy.policy_poster_url = `/${policy.policy_poster_url.replace(/\\/g, '/')}`;
+        let pictureUrl = results[0].picture_url;
+        pictureUrl = pictureUrl.replace(/\\/g, '/');
+
+        const absolutePath = path.join(__dirname, pictureUrl);
+
+        fs.readFile(absolutePath, (err, data) => {
+            if (err) {
+                console.error('File read error:', err);
+                return res.status(500).json({ error: 'Error reading file' });
             }
-        });
 
-        console.log("✅ Fixed Policy Data:", results); // Debug
-        res.json(results);
-    });
-});
+            const ext = path.extname(absolutePath).toLowerCase();
+            let mimeType = 'image/jpeg';
+            if (ext === '.png') {
+                mimeType = 'image/png';
+            } else if (ext === '.gif') {
+                mimeType = 'image/gif';
+            }
 
-app.get('/api/candidates/:candidate_id/transcript', (req, res) => {
-    const candidateId = req.params.candidate_id;
-    const query = `
-        SELECT c.transcript_url
-        FROM candidates c
-        WHERE c.id = ?
-    `;
+            // แปลงข้อมูลไฟล์เป็น Base64 แล้วสร้าง Data URI
+            const base64Data = data.toString('base64');
+            const dataUri = `data:${mimeType};base64,${base64Data}`;
 
-    db.query(query, [candidateId], (err, results) => {
-        if (err) {
-            console.error('Error fetching transcript details:', err);
-            return res.status(500).send('Unable to fetch transcript details');
-        }
-
-        // If no transcript found, send an appropriate message
-        if (results.length === 0 || !results[0].transcript_url) {
-            return res.status(404).send('No transcript found for this candidate');
-        }
-
-        // Fix the path if the transcript_url exists
-        const transcriptUrl = results[0].transcript_url ? `/${results[0].transcript_url.replace(/\\/g, '/')}` : null;
-
-        // Return the transcript URL
-        res.json({ transcript_url: transcriptUrl });
-    });
-});
-
-
-  // 📌 API อัปโหลดรูปและบันทึก URL ลงฐานข้อมูล
-app.post("/upload/:candidate_id", upload.single("image"), (req, res) => {
-    if (!req.file) return res.status(400).send("No file uploaded.");
-
-    const imageUrl = `http://localhost:3000/uploads/${req.file.filename}`;
-    const { candidate_id } = req.params;
-    const sql = "UPDATE candidates SET picture_url = ? WHERE id = ?";
-    
-    db.query(sql, [imageUrl, candidate_id], (err, result) => {
-        if (err) throw err;
-        res.json({ message: "Upload successful", imageUrl });
-    });
-});
-
-// 📌 API ดึงข้อมูลผู้สมัครและแสดงรูป
-app.get("/candidates", (req, res) => {
-    const sql = `
-        SELECT name, studentID, picture_url, transcript_url, policy_poster_url 
-        FROM candidates
-    `;
-    db.query(sql, (err, results) => {
-        if (err) return res.status(500).json({ error: "Database error" });
-        res.json(results);
-    });
-});
-
-app.post("/upload/:studentID", upload.fields([
-    { name: "picture", maxCount: 1 },
-    { name: "transcript", maxCount: 1 },
-    { name: "poster", maxCount: 1 }
-]), (req, res) => {
-    const { studentID } = req.params;
-
-    const findCandidateSQL = "SELECT id FROM candidates WHERE studentID = ?";
-    db.query(findCandidateSQL, [studentID], (err, results) => {
-        if (err) return res.status(500).json({ error: "Database error" });
-        if (results.length === 0) return res.status(404).json({ error: "Candidate not found" });
-
-        const candidate_id = results[0].id;
-        const pictureUrl = req.files["picture"] ? `http://localhost:3000/uploads/${req.files["picture"][0].filename}` : null;
-        const transcriptUrl = req.files["transcript"] ? `http://localhost:3000/uploads/${req.files["transcript"][0].filename}` : null;
-        const posterUrl = req.files["poster"] ? `http://localhost:3000/uploads/${req.files["poster"][0].filename}` : null;
-
-        const updateSQL = "UPDATE candidates SET picture_url = ?, transcript_url = ?, policy_poster_url = ? WHERE id = ?";
-        db.query(updateSQL, [pictureUrl, transcriptUrl, posterUrl, candidate_id], (err) => {
-            if (err) return res.status(500).json({ error: "Database update error" });
-            res.json({ message: "Upload successful", pictureUrl, transcriptUrl, posterUrl });
+            // ส่ง Data URI กลับไปให้ frontend
+            res.json({ imageData: dataUri });
         });
     });
 });
 
+app.get("/vote_president_student", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/vote_president_student.html"));
+});
 
-// ✅ Keep only one route for updating status
-app.put('/api/candidates/:id/status', (req, res) => {
-    const { id } = req.params;
-    const { status } = req.body;
+app.get("/vote_council_school", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/vote_council_school.html"));
+});
 
-    if (!["Approved", "Rejected"].includes(status)) {
-        return res.status(400).json({ message: "Invalid status" });
+app.get("/vote_council_normal", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/vote_council_normal.html"));
+});
+
+app.get("/vote_president_faculty", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/vote_president_faculty.html"));
+});
+
+router.post('/api/vote', async (req, res) => {
+    const { studentId, candidateId, isAbstention } = req.body;
+
+    // If abstaining, candidateId will be null
+    const voteData = {
+        student_id: studentId,
+        candidate_id: isAbstention ? null : candidateId,
+        is_abstention: isAbstention ? 1 : 0,
+        vote_time: new Date(),
+    };
+
+    try {
+        // Insert the vote into the database
+        await db.query('INSERT INTO votes SET ?', voteData);
+        res.status(201).json({ message: 'Vote recorded successfully' });
+    } catch (error) {
+        console.error('Error recording vote:', error);
+        res.status(500).json({ message: 'Error recording vote' });
     }
+});
+app.use(router);
 
-    db.query("UPDATE candidates SET status = ? WHERE id = ?", [status, id], (err, result) => {
+// Fetch image by candidate_id (when a user votes for a candidate)
+app.get('/api/vote-picture', (req, res) => {
+    // Query ดึง candidate id จาก vote table โดยใช้ vote ล่าสุด (อาจปรับเงื่อนไขได้)
+    const query = `
+      SELECT c.picture_url 
+      FROM votes v 
+      JOIN candidates c ON v.candidate_id = c.id 
+      ORDER BY v.vote_time DESC 
+      LIMIT 1
+    `;
+
+    db.query(query, (err, results) => {
         if (err) {
-            console.error("Error updating candidate status:", err);
-            return res.status(500).json({ message: "Database error" });
+            console.error('SQL error:', err);
+            return res.status(500).json({ error: 'Database error' });
         }
-        res.status(200).json({ message: `Candidate marked as ${status}` });
+        if (results.length === 0) {
+            return res.status(404).json({ error: 'No vote found' });
+        }
+
+        // ได้ picture_url จาก candidates
+        let pictureUrl = results[0].picture_url; // ตัวอย่าง: "uploads\82e3fbae0d564a0821d19bfa30050de5.jpg"
+        // แก้ไขให้ใช้ forward slashes
+        pictureUrl = pictureUrl.replace(/\\/g, '/');
+
+        // สร้าง absolute path
+        const absolutePath = path.join(__dirname, pictureUrl);
+
+        fs.readFile(absolutePath, (err, data) => {
+            if (err) {
+                console.error('File read error:', err);
+                return res.status(500).json({ error: 'Error reading file' });
+            }
+
+            // กำหนด mime type ตามนามสกุลไฟล์
+            const ext = path.extname(absolutePath).toLowerCase();
+            let mimeType = 'image/jpeg';
+            if (ext === '.png') {
+                mimeType = 'image/png';
+            } else if (ext === '.gif') {
+                mimeType = 'image/gif';
+            }
+
+            // แปลงข้อมูลไฟล์เป็น Base64 แล้วสร้าง Data URI
+            const base64Data = data.toString('base64');
+            const dataUri = `data:${mimeType};base64,${base64Data}`;
+
+            // ส่ง Data URI กลับไปให้ frontend
+            res.json({ imageData: dataUri });
+        });
     });
 });
 
-app.get("/admins", (req, res) => {
-    const sql = "SELECT id, name, role FROM users WHERE role IN ('admin', 'committee')";
-    db.query(sql, (err, results) => {
-        if (err) {
-            console.error("Error fetching users:", err);
-            return res.status(500).json({ error: "Failed to fetch users" });
-        }
-        res.json(results);
-    });
-});
-
-app.post("/updateRole", express.json(), (req, res) => {
-    const { userId, role } = req.body;
-    const sql = "UPDATE users SET role = ? WHERE id = ?";
-    db.query(sql, [role, userId], (err, result) => {
-        if (err) {
-            console.error("Error updating role:", err);
-            return res.status(500).json({ error: "Failed to update role" });
-        }
-        res.json({ message: "Role updated successfully" });
-    });
-});
-
-app.delete("/delete/:id", (req, res) => {
-    const userId = req.params.id;
-    const sql = "DELETE FROM users WHERE id = ?";
-    db.query(sql, [userId], (err, result) => {
-        if (err) {
-            console.error("Error deleting user:", err);
-            return res.status(500).json({ error: "Failed to delete user" });
-        }
-        res.json({ message: "User deleted successfully" });
-    });
-});
-
-app.get("/list_user", (req, res) => {
-    res.sendFile(path.join("D:/candidate/view/admin/list_user.html"));
-});
-
-app.get("/users", (req, res) => {
-    const sql = "SELECT id, name, role FROM users WHERE role IN ('user', 'candidate')";
-    db.query(sql, (err, results) => {
-        if (err) {
-            console.error("Error fetching users:", err);
-            return res.status(500).json({ error: "Failed to fetch users" });
-        }
-        res.json(results);
-    });
-});
-
-
-//candidate
 app.post('/api/votecandidate', async (req, res) => {
     const { studentId, candidateId, isAbstention } = req.body;
 
@@ -811,7 +701,7 @@ app.post('/api/votecandidate', async (req, res) => {
             if (!candidateType) {
                 return res.status(400).json({ error: 'Candidate type is required for abstention.' });
             }
-        
+
             // Record abstention with studentId and candidateType
             await db.query(
                 'INSERT INTO votes (student_id, candidate_type, is_abstention) VALUES (?, ?, ?)',
@@ -856,7 +746,7 @@ app.post('/api/voteschool', async (req, res) => {
     }
 
     try {
-        let candidateType = 'Student council member (School of study)'; // Default value for abstention
+        let candidateType = 'Student council member (School of)'; // Default value for abstention
 
         if (!isAbstention) {
             // Fetch the candidate's type from the database
@@ -872,7 +762,7 @@ app.post('/api/voteschool', async (req, res) => {
             if (!candidateType) {
                 return res.status(400).json({ error: 'Candidate type is required for abstention.' });
             }
-        
+
             // Record abstention with studentId and candidateType
             await db.query(
                 'INSERT INTO votes (student_id, candidate_type, is_abstention) VALUES (?, ?, ?)',
@@ -903,6 +793,68 @@ app.post('/api/voteschool', async (req, res) => {
         res.status(500).json({ message: 'Error recording vote' });
     }
 });
+
+//Faculty
+app.post('/api/votefaculty', async (req, res) => {
+    const { studentId, candidateId, isAbstention } = req.body;
+
+    // Validate input
+    if (isAbstention && candidateId !== null) {
+        return res.status(400).json({ message: "Candidate ID should be null when abstaining." });
+    }
+    if (!isAbstention && candidateId === null) {
+        return res.status(400).json({ message: "Candidate ID is required for voting." });
+    }
+
+    try {
+        let candidateType = 'President of the Faculty Student Council'; // Default value for abstention
+
+        if (!isAbstention) {
+            // Fetch the candidate's type from the database
+            const [candidateResult] = await db.promise().query('SELECT candidate_type FROM candidates WHERE id = ?', [candidateId]);
+
+            if (!candidateResult.length) {
+                return res.status(404).json({ message: 'Candidate not found' });
+            }
+
+            candidateType = candidateResult[0].candidate_type;
+        }
+        if (isAbstention) {
+            if (!candidateType) {
+                return res.status(400).json({ error: 'Candidate type is required for abstention.' });
+            }
+
+            // Record abstention with studentId and candidateType
+            await db.query(
+                'INSERT INTO votes (student_id, candidate_type, is_abstention) VALUES (?, ?, ?)',
+                [studentId, candidateType, true]
+            );
+        }
+        const [existingVote] = await db.promise().query(
+            'SELECT * FROM votes WHERE student_id = ? AND candidate_type = ?',
+            [studentId, candidateType]
+        );
+
+        if (existingVote.length > 0) {
+            return res.status(400).json({ message: "You have already voted for this candidate type." });
+        }
+        const voteData = {
+            student_id: studentId,
+            candidate_id: isAbstention ? null : candidateId,
+            candidate_type: candidateType,
+            is_abstention: isAbstention ? 1 : 0,
+            vote_time: new Date(),
+        };
+
+        // Insert the vote into the database
+        await db.promise().query('INSERT INTO votes SET ?', voteData);
+        res.status(201).json({ message: 'Vote recorded successfully' });
+    } catch (error) {
+        console.error('Error recording vote:', error);
+        res.status(500).json({ message: 'Error recording vote' });
+    }
+});
+
 
 //normal
 app.post('/api/votenormal', async (req, res) => {
@@ -973,7 +925,7 @@ app.post('/api/votenormal', async (req, res) => {
 
 app.get('/api/vote-status/:studentId', async (req, res) => {
     const { studentId } = req.params;
-    const candidateType = req.query.candidateType;  
+    const candidateType = req.query.candidateType;
 
     try {
         if (candidateType === 'Student council member (Normal)') {
@@ -1022,72 +974,189 @@ app.get('/api/vote-status/:studentId', async (req, res) => {
     }
 });
 
-app.get('/api/vote-picture', (req, res) => {
-    // Query to fetch candidate images (e.g., fetching all pictures for the most recently voted candidate)
-    const query = `
-      SELECT c.picture_url 
-      FROM votes v 
-      JOIN candidates c ON v.candidate_id = c.id 
-      ORDER BY v.vote_time DESC 
-      LIMIT 1
-    `;
-  
-    db.query(query, (err, results) => {
-      if (err) {
-        console.error('SQL error:', err);
-        return res.status(500).json({ error: 'Database error' });
-      }
-      if (results.length === 0) {
-        return res.status(404).json({ error: 'No vote found' });
-      }
-  
-      // Process each picture_url and create an array of base64 images
-      const imageDataArray = [];
-  
-      // Iterate over the results and process each picture_url
-      results.forEach(result => {
-        let pictureUrl = result.picture_url; // Example: "uploads/82e3fbae0d564a0821d19bfa30050de5.jpg"
-        pictureUrl = pictureUrl.replace(/\\/g, '/'); // Convert backslashes to forward slashes
-  
-        const absolutePath = path.join(__dirname, pictureUrl);
-  
-        // Read each image and convert to Base64
-        fs.readFile(absolutePath, (err, data) => {
-          if (err) {
-            console.error('File read error:', err);
-            return res.status(500).json({ error: 'Error reading file' });
-          }
-  
-          // Determine mime type based on file extension
-          const ext = path.extname(absolutePath).toLowerCase();
-          let mimeType = 'image/jpeg';
-          if (ext === '.png') {
-            mimeType = 'image/png';
-          } else if (ext === '.gif') {
-            mimeType = 'image/gif';
-          }
-  
-          // Convert file to Base64 string
-          const base64Data = data.toString('base64');
-          const dataUri = `data:${mimeType};base64,${base64Data}`;
-  
-          // Push the Data URI into the array
-          imageDataArray.push(dataUri);
-  
-          // If it's the last image (or last item in the result set), send the response
-          if (imageDataArray.length === results.length) {
-            res.json({ images: imageDataArray });
-          }
-        });
-      });
+app.get("/success_president_student", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/success_president_student.html"));
+});
+
+app.get("/success_council_school", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/success_council_school.html"));
+});
+
+app.get("/success_council_normal", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/success_councul_normal.html"));
+});
+
+app.get("/success_president_faculty", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/success_president_faculty.html"));
+});
+
+app.get("/election_result_menu", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/election_result_menu.html"));
+});
+
+app.get("/result_president_student", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/result_president_student.html"));
+});
+
+app.get("/result_council_school", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/result_council_school.html"));
+});
+
+app.get("/result_council_normal", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/result_council_normal.html"));
+});
+
+app.get("/result_president_faculty", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/result_president_faculty.html"));
+});
+
+app.get("/list_admin", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/list_admin.html"));
+});
+
+app.get("/admins", (req, res) => {
+    const sql = "SELECT id, username, role FROM staff WHERE role IN ('admin', 'committee')";
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error("Error fetching users:", err);
+            return res.status(500).json({ error: "Failed to fetch users" });
+        }
+        res.json(results);
     });
-  });
+});
+
+app.post("/updateRole", express.json(), (req, res) => {
+    const { userId, role } = req.body;
+    const sql = "UPDATE users SET role = ? WHERE id = ?";
+    db.query(sql, [role, userId], (err, result) => {
+        if (err) {
+            console.error("Error updating role:", err);
+            return res.status(500).json({ error: "Failed to update role" });
+        }
+        res.json({ message: "Role updated successfully" });
+    });
+});
+
+app.delete("/delete/:id", (req, res) => {
+    const userId = req.params.id;
+    const sql = "DELETE FROM users WHERE id = ?";
+    db.query(sql, [userId], (err, result) => {
+        if (err) {
+            console.error("Error deleting user:", err);
+            return res.status(500).json({ error: "Failed to delete user" });
+        }
+        res.json({ message: "User deleted successfully" });
+    });
+});
+
+app.delete("/delete1/:id", (req, res) => {
+    const { id } = req.params;
+    db.query("DELETE FROM staff WHERE id = ?", [id], (err) => {
+        if (err) return res.status(500).json({ error: "Failed to delete user" });
+        res.json({ message: "User deleted successfully" });
+    });
+});
+
+app.post("/updateRole1", (req, res) => {
+    const { userId, role } = req.body;
+    db.query("UPDATE staff SET role = ? WHERE id = ?", [role, userId], (err) => {
+        if (err) return res.status(500).json({ error: "Failed to update role" });
+        res.json({ message: "Role updated successfully" });
+    });
+});
+
+
+app.get("/list_user", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/list_user.html"));
+});
 
 
 
-  app.get('/api/candidates/approve', (req, res) => {
+app.get("/users", (req, res) => {
+    const sql = "SELECT id, name, role FROM users WHERE role IN ('user', 'candidate')";
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error("Error fetching users:", err);
+            return res.status(500).json({ error: "Failed to fetch users" });
+        }
+        console.log("Fetched users:", results); // Debugging
+        res.json(results);
+    });
+});
+
+app.get("/list_candidate_menu", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/list_candidate_menu.html"));
+});
+
+function fetchCandidatesByType(candidateType, res) {
+    const query = `
+      SELECT c.id AS candidate_id, c.name AS candidate_name, c.student_id, s.school_name, m.major_name, c.candidate_number, c.photo
+      FROM candidates c
+      JOIN schools s ON c.school_id = s.id
+      JOIN majors m ON c.major_id = m.id
+      WHERE c.candidate_type = ?
+    `;
+
+    db.query(query, [candidateType], (err, results) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json(results);
+    });
+}
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+app.get('/api/candidates', (req, res) => {
+    const query = `
+      SELECT
+        c.id,
+        c.name,
+        c.studentID,
+        c.line_id,  -- ✅ Added Line ID
+        c.gpax_level,  -- ✅ Added GPAX Level
+        c.gpax,  -- ✅ Added GPAX
+        s.school_name AS school,
+        m.major_name AS major,
+        c.picture_url,
+        c.transcript_url,
+        c.policy_poster_url,
+        c.status,  -- ✅ Added status for frontend
+        c.candidate_type
+      FROM candidates c
+      JOIN schools s ON c.school_id = s.id
+      JOIN majors m ON c.major_id = m.id;
+    `;
+    db.query(query, (err, results) => {
+        if (err) {
+            console.error('Error fetching candidates:', err);
+            return res.status(500).send('Server error');
+        }
+
+        results.forEach(candidate => {
+            console.log("Before Fix:", candidate.picture_url);
+
+            candidate.picture_url = candidate.picture_url
+                ? `/${candidate.picture_url.replace(/\\/g, '/')} `
+                : '/uploads/default.jpg';
+
+            candidate.transcript_url = candidate.transcript_url
+                ? `/${candidate.transcript_url.replace(/\\/g, '/')} `
+                : null;
+
+            candidate.policy_poster_url = candidate.policy_poster_url
+                ? `/${candidate.policy_poster_url.replace(/\\/g, '/')} `
+                : null;
+
+            console.log("After Fix:", candidate.picture_url);
+        });
+
+        res.json(results);
+    });
+});
+
+app.get('/api/candidates/approve', (req, res) => {
     let type = req.query.type;
-
     let query = `
       SELECT
         c.id,
@@ -1101,16 +1170,15 @@ app.get('/api/vote-picture', (req, res) => {
         c.picture_url,
         c.transcript_url,
         c.policy_poster_url,
-        c.status,
         c.candidate_type
       FROM candidates c
       JOIN schools s ON c.school_id = s.id
       JOIN majors m ON c.major_id = m.id
-      WHERE c.status = 'Approved'`
-    ;
+      WHERE c.status = 'Approved'
+    `;
 
     if (type) {
-        query +=  `AND c.candidate_type = ${db.escape(type)}`;
+        query += ` AND c.candidate_type = ${db.escape(type)}`;
     }
 
     db.query(query, (err, results) => {
@@ -1120,57 +1188,20 @@ app.get('/api/vote-picture', (req, res) => {
         }
 
         results.forEach(candidate => {
-            candidate.picture_url = candidate.picture_url 
+            candidate.picture_url = candidate.picture_url
                 ? `/${candidate.picture_url.replace(/\\/g, '/')} `
                 : '/uploads/default.jpg';
 
-            candidate.transcript_url = candidate.transcript_url 
+            candidate.transcript_url = candidate.transcript_url
                 ? `/${candidate.transcript_url.replace(/\\/g, '/')} `
                 : null;
 
-            candidate.policy_poster_url = candidate.policy_poster_url 
+            candidate.policy_poster_url = candidate.policy_poster_url
                 ? `/${candidate.policy_poster_url.replace(/\\/g, '/')} `
                 : null;
         });
 
         res.json(results);
-    });
-});
-
-
-//history api
-
-app.put('/api/candidates/:id/status', (req, res) => {
-    const { id } = req.params;
-    const { status } = req.body;
-
-    if (!["Approved", "Rejected"].includes(status)) {
-        return res.status(400).json({ message: "Invalid status" });
-    }
-
-    // อัปเดตสถานะของผู้สมัครในตาราง candidates
-    db.query("UPDATE candidates SET status = ? WHERE id = ?", [status, id], (err, result) => {
-        if (err) {
-            console.error("Error updating candidate status:", err);
-            return res.status(500).json({ message: "Database error" });
-        }
-
-        // ถ้าสถานะเป็น Approved ต้องอัปเดต role ของผู้ใช้งานเป็น candidate
-        if (status === "Approved") {
-            // เรียกใช้คำสั่งเพื่ออัปเดต role ของผู้ใช้เป็น candidate
-            db.query("UPDATE users SET role = 'candidate' WHERE studentID = (SELECT studentID FROM candidates WHERE id = ?)", [id], (err2, result2) => {
-                if (err2) {
-                    console.error("Error updating user role:", err2);
-                    return res.status(500).json({ message: "Error updating user role" });
-                }
-
-                // ส่งผลลัพธ์สำเร็จ
-                res.status(200).json({ message: `Candidate marked as ${status} and role updated to candidate` });
-            });
-        } else {
-            // ถ้าสถานะเป็น Rejected ก็ส่งข้อความไป
-            res.status(200).json({ message: `Candidate marked as ${status}` });
-        }
     });
 });
 
@@ -1214,15 +1245,15 @@ app.get('/api/pending', (req, res) => {
 
         // ปรับ URL ของรูปภาพและไฟล์ต่างๆ
         results.forEach(candidate => {
-            candidate.picture_url = candidate.picture_url 
+            candidate.picture_url = candidate.picture_url
                 ? `/${candidate.picture_url.replace(/\\/g, '/')} `
                 : '/uploads/default.jpg';
 
-            candidate.transcript_url = candidate.transcript_url 
+            candidate.transcript_url = candidate.transcript_url
                 ? `/${candidate.transcript_url.replace(/\\/g, '/')} `
                 : null;
 
-            candidate.policy_poster_url = candidate.policy_poster_url 
+            candidate.policy_poster_url = candidate.policy_poster_url
                 ? `/${candidate.policy_poster_url.replace(/\\/g, '/')} `
                 : null;
         });
@@ -1231,18 +1262,579 @@ app.get('/api/pending', (req, res) => {
     });
 });
 
-app.get('/api/candidates/history', (req, res) => {
-    db.query("SELECT * FROM candidates WHERE status IN ('Approved', 'Rejected')", (err, result) => {
+
+app.get('/api/policies/:candidate_id', (req, res) => {
+    const candidateId = req.params.candidate_id;
+    const query = `
+        SELECT p.policy_detail, c.policy_poster_url
+        FROM policies p
+        JOIN candidates c ON p.candidate_id = c.id
+        WHERE c.id = ?
+    `;
+
+    db.query(query, [candidateId], (err, results) => {
         if (err) {
-            console.error("Error fetching candidates history:", err);
-            return res.status(500).json({ message: "Error fetching data" });
+            console.error('Error fetching policy details:', err);
+            return res.status(500).send('Unable to fetch policy details');
         }
-        res.json(result); // ส่งข้อมูลผู้สมัครที่มีสถานะ Approved หรือ Rejected
+
+        results.forEach(policy => {
+            if (policy.policy_poster_url) {
+                // ✅ แก้ path ให้ถูกต้อง
+                policy.policy_poster_url = `/${policy.policy_poster_url.replace(/\\/g, '/')}`;
+            }
+        });
+
+        console.log("✅ Fixed Policy Data:", results); // Debug
+        res.json(results);
     });
 });
 
-//----------------------------- CONDITION-------------------------
-const fs = require('fs');
+app.get('/api/candidates/:candidate_id/transcript', (req, res) => {
+    const candidateId = req.params.candidate_id;
+    const query = `
+        SELECT c.transcript_url
+        FROM candidates c
+        WHERE c.id = ?
+    `;
+
+    db.query(query, [candidateId], (err, results) => {
+        if (err) {
+            console.error('Error fetching transcript details:', err);
+            return res.status(500).send('Unable to fetch transcript details');
+        }
+
+        // If no transcript found, send an appropriate message
+        if (results.length === 0 || !results[0].transcript_url) {
+            return res.status(404).send('No transcript found for this candidate');
+        }
+
+        // Fix the path if the transcript_url exists
+        const transcriptUrl = results[0].transcript_url ? `/${results[0].transcript_url.replace(/\\/g, '/')}` : null;
+
+        // Return the transcript URL
+        res.json({ transcript_url: transcriptUrl });
+    });
+});
+
+app.get('/getCandidates', (req, res) => {
+    const query = `
+      SELECT c.name AS candidate_name, s.school_name, m.major_name, p.policy_detail, c.picture_url
+      FROM candidates c
+      JOIN schools s ON c.school_id = s.id
+      JOIN majors m ON c.major_id = m.id
+      LEFT JOIN policies p ON c.id = p.candidate_id;
+    `;
+    db.query(query, (err, results) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json(results);
+    });
+});
+
+app.get('/api/policies/:candidate_id', (req, res) => {
+    const candidateId = req.params.candidate_id;  // Corrected parameter name
+
+    const query = `
+        SELECT p.policy_detail, c.policy_poster_url
+        FROM policies p
+        JOIN candidates c ON p.candidate_id = c.id
+        WHERE c.id = ?
+    `;
+
+    db.query(query, [candidateId], (err, results) => {
+        if (err) {
+            console.error('Error fetching policies: ', err);
+            return res.status(500).send('Unable to fetch policies');
+        }
+
+        res.json(results);
+    });
+});
+
+// Update candidate information
+app.put('/api/updateCandidate/:id', (req, res) => {
+    const { updatedName, updatedStudentId, updatedSchoolId, updatedMajorId } = req.body;
+    const candidateId = req.params.id;
+
+    if (!updatedName || !updatedStudentId || !updatedSchoolId || !updatedMajorId) {
+        return res.status(400).json({ success: false, message: "All fields are required" });
+    }
+
+    const query = `
+        UPDATE candidates 
+        SET name = ?, studentID = ?, school_id = ?, major_id = ? 
+        WHERE id = ?
+    `;
+    db.query(query, [updatedName, updatedStudentId, updatedSchoolId, updatedMajorId, candidateId], (err, results) => {
+        if (err) {
+            return res.status(500).json({ success: false, message: "Database query failed" });
+        }
+        res.json({ success: true });
+    });
+});
+
+app.get("/info_president_student", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/info_president_student.html"));
+});
+
+app.get("/info_add_president_student", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/info_add_president_student.html"));
+});
+
+app.get("/info_council_school", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/info_council_school.html"));
+});
+
+app.get("/info_add_council_school", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/info_add_council_school.html"));
+});
+
+app.get("/info_council_normal", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/info_council_normal.html"));
+});
+
+app.get("/info_add_council_normal", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/info_add_council_normal.html"));
+});
+
+app.get("/info_president_faculty", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/info_president_faculty.html"));
+});
+
+app.get("/PDPA_edit", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/PDPA_edit.html"));
+});
+
+app.get('/fetch-pdpa', (req, res) => {
+    db.query('SELECT * FROM pdpa_content WHERE id = 1', (err, results) => {
+        if (err) return res.status(500).json({ error: 'Database error' });
+        res.json(results[0]);
+    });
+});
+
+app.post('/update-pdpa-content', upload.single('image'), (req, res) => {
+    const { headerText, radioLabel, swalMessage } = req.body;
+    let imagePath = null;
+
+    if (req.file) {
+        imagePath = `/uploads/${req.file.filename}`;
+    }
+
+    let sql = 'UPDATE pdpa_content SET header_text=?, radio_label=?, swal_message=?';
+    const params = [headerText, radioLabel, swalMessage];
+
+    if (imagePath) {
+        sql += ', image_path=?';
+        params.push(imagePath);
+    }
+
+    sql += ' WHERE id=1';
+
+    db.query(sql, params, (err, result) => {
+        if (err) return res.status(500).json({ success: false, error: err.message });
+        res.json({ success: true });
+    });
+});
+
+app.delete('/delete-image', (req, res) => {
+    const sqlSelect = 'SELECT image_path FROM pdpa_content LIMIT 1';
+
+    db.query(sqlSelect, (err, result) => {
+        if (err) return res.status(500).json({ success: false, error: err });
+
+        const imagePath = result[0]?.image_path;
+        if (!imagePath) return res.json({ success: true }); // No image, no need to delete
+
+        const filePath = path.join(__dirname, 'public', 'img', imagePath);
+
+        fs.unlink(filePath, (unlinkErr) => {
+            if (unlinkErr && unlinkErr.code !== 'ENOENT') {
+                return res.status(500).json({ success: false, error: unlinkErr.message });
+            }
+
+            const sqlUpdate = 'UPDATE pdpa_content SET image_path = NULL';
+            db.query(sqlUpdate, (updateErr, updateResult) => {
+                if (updateErr) return res.status(500).json({ success: false, error: updateErr });
+                res.json({ success: true });
+            });
+        });
+    });
+});
+
+app.get("/datetime_setter_menu", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/datetime_setter_menu.html"));
+});
+
+app.get("/datetime_setter_register", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/datetime_setter_register.html"));
+});
+
+app.get("/datetime_setter_info", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/datetime_setter_info.html"));
+});
+
+app.get("/datetime_setter_vote", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/datetime_setter_vote.html"));
+});
+
+app.get("/datetime_setter_score", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/datetime_setter_score.html"));
+});
+
+const validEvents = [
+    "President of the Student Union Candidate Register",
+    "Student Council Member (School of) Register",
+    "Student Council Member (Normal) Register",
+    "President of the Student Union Candidate Information",
+    "Student Council Member (School of) Information",
+    "Student Council Member (Normal) Information",
+    "President of Student Association Information",
+    "President of the Student Union Candidate Vote",
+    "Student Council Member (School of) Vote",
+    "Student Council Member (Normal) Vote",
+    "President of Student Association Vote",
+    "President of the Student Union Candidate Result",
+    "Student Council Member (School of) Result",
+    "Student Council Member (Normal) Result",
+    "President of Student Association Result"
+];
+
+// Endpoint to set the datetime
+// Endpoint to set or update the datetime
+app.post('/datetime_setter', (req, res) => {
+    const { eventType, startDatetime, endDatetime } = req.body;
+
+    if (!validEvents.includes(eventType)) {
+        return res.status(400).json({ message: "Invalid event type" });
+    }
+
+    const [start_date, start_time] = startDatetime.split('T');
+    const [end_date, end_time] = endDatetime.split('T');
+
+    // Check if the event type already has an entry in the database
+    const selectQuery = "SELECT * FROM setter WHERE event_type = ?";
+    db.query(selectQuery, [eventType], (selectError, selectResults) => {
+        if (selectError) {
+            return res.status(500).json({ message: "Error checking existing datetime", error: selectError.message });
+        }
+
+        if (selectResults.length > 0) {
+            // If the event already exists, update the existing record
+            const updateQuery = "UPDATE setter SET start_date = ?, start_time = ?, end_date = ?, end_time = ? WHERE event_type = ?";
+            const updateValues = [start_date, start_time, end_date, end_time, eventType];
+            db.query(updateQuery, updateValues, (updateError, updateResult) => {
+                if (updateError) {
+                    return res.status(500).json({ message: "Error updating the datetime.", error: updateError.message });
+                }
+                res.json({ message: "Datetime updated successfully" });
+            });
+        } else {
+            // If the event doesn't exist, insert a new record
+            const insertQuery = "INSERT INTO setter (event_type, start_date, start_time, end_date, end_time) VALUES (?, ?, ?, ?, ?)";
+            const insertValues = [eventType, start_date, start_time, end_date, end_time];
+            db.query(insertQuery, insertValues, (insertError, insertResult) => {
+                if (insertError) {
+                    return res.status(500).json({ message: "Error saving the datetime.", error: insertError.message });
+                }
+                res.json({ message: "Datetime set successfully" });
+            });
+        }
+    });
+});
+
+app.get('/datetime_getter', (req, res) => {
+    const { eventType } = req.query;
+
+    if (!eventType) {
+        return res.status(400).json({ message: 'Event type is required' });
+    }
+
+    const query = "SELECT * FROM setter WHERE event_type = ?";
+
+    db.query(query, [eventType], (error, results) => {
+        if (error) {
+            console.error('Database error:', error);
+            return res.status(500).json({ message: 'Error retrieving event datetime', error: error.message });
+        }
+
+        if (results.length > 0) {
+            // Send the first matching result, adjust the response as necessary
+            const event = results[0];
+            res.json({
+                start_date: event.start_date,
+                start_time: event.start_time,
+                end_date: event.end_date,
+                end_time: event.end_time,
+            });
+        } else {
+            res.json({ message: 'No datetime set for this event' });
+        }
+    });
+});
+
+app.get('/active-events', (req, res) => {
+    // Get the current date and time
+    const currentDate = new Date();
+    const localDate = new Date(currentDate.getTime() - currentDate.getTimezoneOffset() * 60000);
+    const currentDateString = localDate.toISOString().split('T')[0]; // Current date in YYYY-MM-DD format
+    const currentTimeString = localDate.toISOString().split('T')[1].split('.')[0]; // Current time in HH:mm:ss format
+
+    console.log("Local Date:", localDate);
+    console.log("Current Date String:", currentDateString);
+    console.log("Current Time String:", currentTimeString);
+
+    // Merge start_date and start_time to form start_datetime
+    const currentDateTimeString = `${currentDateString} ${currentTimeString}`;
+
+    const query = `
+        SELECT event_type
+        FROM setter
+        WHERE CONCAT(start_date, ' ', start_time) <= ? 
+          AND CONCAT(end_date, ' ', end_time) >= ?
+        ORDER BY start_date, start_time;
+    `;
+
+    db.execute(query, [currentDateTimeString, currentDateTimeString], (err, results) => {
+        if (err) {
+            console.error("Error executing query:", err);
+            return res.status(500).json({ message: "Internal server error" });
+        }
+
+        console.log("Query Results:", results); // Log results to check if events are returned
+
+        const activeEvents = results.map(row => row.event_type);
+        res.json(activeEvents); // Return active events
+    });
+});
+
+app.get("/add_candidate", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/add_candidate.html"));
+});
+
+app.get("/add_user", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/add_user.html"));
+});
+
+app.get("/election_score_menu", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/election_score_menu.html"));
+});
+
+app.get("/score_president_student", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/score_president_student.html"));
+});
+
+app.get("/score_council_school", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/score_council_school.html"));
+});
+
+app.get("/score_council_normal", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/score_council_normal.html"));
+});
+
+app.get("/score_president_faculty", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/score_president_faculty.html"));
+});
+
+app.get('/api/candidates/approved-scores', (req, res) => {
+    const type = req.query.type;
+
+    let query = `
+      SELECT 
+        c.id,
+        c.name,
+        c.studentID,
+        c.candidate_type,
+        v.candidate_id,
+        COUNT(v.id) AS vote_count
+      FROM candidates c
+      LEFT JOIN votes v ON c.id = v.candidate_id
+      WHERE c.status = 'Approved'
+    `;
+
+    if (type) {
+        query += ` AND c.candidate_type = ${db.escape(type)}`;
+    }
+
+    query += ` GROUP BY c.id`;
+
+    db.query(query, (err, results) => {
+        if (err) return res.status(500).send('Error fetching candidates');
+
+        const votersQuery = `
+        SELECT COUNT(DISTINCT student_id) AS totalVoters
+        FROM votes
+        ${type ? `WHERE candidate_type = ${db.escape(type)}` : ''}
+      `;
+
+        db.query(votersQuery, (err, votersResults) => {
+            if (err) return res.status(500).send('Error fetching voters');
+
+            const totalVoters = votersResults[0]?.totalVoters || 0;
+
+            const noVoteQuery = `
+          SELECT COUNT(*) AS noVoteCount
+          FROM votes
+          WHERE candidate_id IS NULL
+          ${type ? `AND candidate_type = ${db.escape(type)}` : ''}
+        `;
+
+            db.query(noVoteQuery, (err, noVoteResults) => {
+                if (err) return res.status(500).send('Error fetching no votes');
+
+                const noVoteCount = noVoteResults[0]?.noVoteCount || 0;
+
+                const eligibleQuery = `
+            SELECT COUNT(*) AS totalEligible
+            FROM users
+            WHERE role IN ('candidate', 'user');
+          `;
+
+                db.query(eligibleQuery, (err, eligibleResults) => {
+                    if (err) return res.status(500).send('Error fetching eligible voters');
+
+                    const totalEligible = eligibleResults[0]?.totalEligible || 0;
+
+                    const schoolPromises = results.map(candidate => {
+                        return new Promise((resolve, reject) => {
+                            const schoolQuery = `
+                  SELECT s.school_name 
+                  FROM users u
+                  JOIN school_codes sc ON SUBSTRING(u.studentID, 4, 2) = sc.school_code
+                  JOIN schools s ON sc.school_id = s.id
+                  WHERE u.studentID = ?
+                `;
+
+                            db.execute(schoolQuery, [candidate.studentID], (err, schoolResults) => {
+                                if (err) return reject(err);
+                                candidate.school = schoolResults[0]?.school_name || 'Unknown';
+                                resolve(candidate);
+                            });
+                        });
+                    });
+
+                    Promise.all(schoolPromises)
+                        .then(updatedCandidates => {
+                            res.json({
+                                candidates: updatedCandidates,
+                                totalVoters,
+                                noVoteCount,
+                                totalEligible
+                            });
+                        })
+                        .catch(() => res.status(500).json({ message: 'Error fetching school data' }));
+                });
+            });
+        });
+    });
+});
+
+app.get('/api/candidates/approved-scores1', (req, res) => {
+    const type = req.query.type;
+
+    let query = `
+      SELECT 
+        c.id,
+        c.name,
+        c.studentID,
+        c.candidate_type,
+        v.candidate_id,
+        COUNT(v.id) AS vote_count
+      FROM candidates c
+      LEFT JOIN votes v ON c.id = v.candidate_id
+      WHERE c.status = 'Pending'
+    `;
+
+    if (type) {
+        query += ` AND c.candidate_type = ${db.escape(type)}`;
+    }
+
+    query += ` GROUP BY c.id`;
+
+    db.query(query, (err, results) => {
+        if (err) return res.status(500).send('Error fetching candidates');
+
+        const votersQuery = `
+        SELECT COUNT(DISTINCT student_id) AS totalVoters
+        FROM votes
+        ${type ? `WHERE candidate_type = ${db.escape(type)}` : ''}
+      `;
+
+        db.query(votersQuery, (err, votersResults) => {
+            if (err) return res.status(500).send('Error fetching voters');
+
+            const totalVoters = votersResults[0]?.totalVoters || 0;
+
+            const noVoteQuery = `
+          SELECT COUNT(*) AS noVoteCount
+          FROM votes
+          WHERE candidate_id IS NULL
+          ${type ? `AND candidate_type = ${db.escape(type)}` : ''}
+        `;
+
+            db.query(noVoteQuery, (err, noVoteResults) => {
+                if (err) return res.status(500).send('Error fetching no votes');
+
+                const noVoteCount = noVoteResults[0]?.noVoteCount || 0;
+
+                const eligibleQuery = `
+            SELECT COUNT(*) AS totalEligible
+            FROM users
+            WHERE role IN ('candidate', 'user');
+          `;
+
+                db.query(eligibleQuery, (err, eligibleResults) => {
+                    if (err) return res.status(500).send('Error fetching eligible voters');
+
+                    const totalEligible = eligibleResults[0]?.totalEligible || 0;
+
+                    const schoolPromises = results.map(candidate => {
+                        return new Promise((resolve, reject) => {
+                            const schoolQuery = `
+                  SELECT s.school_name 
+                  FROM users u
+                  JOIN school_codes sc ON SUBSTRING(u.studentID, 4, 2) = sc.school_code
+                  JOIN schools s ON sc.school_id = s.id
+                  WHERE u.studentID = ?
+                `;
+
+                            db.execute(schoolQuery, [candidate.studentID], (err, schoolResults) => {
+                                if (err) return reject(err);
+                                candidate.school = schoolResults[0]?.school_name || 'Unknown';
+                                resolve(candidate);
+                            });
+                        });
+                    });
+
+                    Promise.all(schoolPromises)
+                        .then(updatedCandidates => {
+                            res.json({
+                                candidates: updatedCandidates,
+                                totalVoters,
+                                noVoteCount,
+                                totalEligible
+                            });
+                        })
+                        .catch(() => res.status(500).json({ message: 'Error fetching school data' }));
+                });
+            });
+        });
+    });
+});
+
+
+app.get("/condition_edit_president", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/condition_edit_president.html"));
+});
+
+app.get("/condition_edit_council_school", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/condition_edit_council_school.html"));
+});
+
+app.get("/condition_edit_council_normal", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/condition_edit_council_normal.html"));
+});
 
 // Endpoint to fetch header text by id
 app.get("/header/:id", (req, res) => {
@@ -1265,7 +1857,7 @@ app.put("/save-header/:id", (req, res) => {
     // อัปเดตข้อความในฐานข้อมูล
     db.query("UPDATE headers SET text = ? WHERE id = ?", [headerText, headerId], (err, result) => {
         if (err) return res.status(500).json({ error: err.message });
-        
+
         if (result.affectedRows > 0) {
             res.json({ message: "Header updated successfully!" });
         } else {
@@ -1369,7 +1961,183 @@ app.put("/update-image", upload.single("image"), (req, res) => {
     );
 });
 
+app.get("/approve_president", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/approve_president.html"));
+});
 
+app.get("/approve_council_school", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/approve_council_school.html"));
+});
+
+app.get("/approve_council_normal", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/approve_council_normal.html"));
+});
+
+app.put('/api/candidates/:id/status', (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!["Approved", "Rejected"].includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+    }
+
+    // อัปเดตสถานะของผู้สมัครในตาราง candidates
+    db.query("UPDATE candidates SET status = ? WHERE id = ?", [status, id], (err, result) => {
+        if (err) {
+            console.error("Error updating candidate status:", err);
+            return res.status(500).json({ message: "Database error" });
+        }
+
+        // ถ้าสถานะเป็น Approved ต้องอัปเดต role ของผู้ใช้งานเป็น candidate
+        if (status === "Approved") {
+            // เรียกใช้คำสั่งเพื่ออัปเดต role ของผู้ใช้เป็น candidate
+            db.query("UPDATE users SET role = 'candidate' WHERE studentID = (SELECT studentID FROM candidates WHERE id = ?)", [id], (err2, result2) => {
+                if (err2) {
+                    console.error("Error updating user role:", err2);
+                    return res.status(500).json({ message: "Error updating user role" });
+                }
+
+                // ส่งผลลัพธ์สำเร็จ
+                res.status(200).json({ message: `Candidate marked as ${status} and role updated to candidate` });
+            });
+        } else {
+            // ถ้าสถานะเป็น Rejected ก็ส่งข้อความไป
+            res.status(200).json({ message: `Candidate marked as ${status}` });
+        }
+    });
+});
+
+
+app.get("/history", (req, res) => {
+    res.sendFile(path.join("D:/candidate/public/history.html"));
+});
+
+app.get('/api/candidates/history', (req, res) => {
+    db.query("SELECT * FROM candidates WHERE status IN ('Approved', 'Rejected')", (err, result) => {
+        if (err) {
+            console.error("Error fetching candidates history:", err);
+            return res.status(500).json({ message: "Error fetching data" });
+        }
+        res.json(result); // ส่งข้อมูลผู้สมัครที่มีสถานะ Approved หรือ Rejected
+    });
+});
+
+app.get('/api/vote-pictures', (req, res) => {
+    // Query to get candidate pictures of all voted candidates
+    const query = `
+      SELECT c.picture_url 
+      FROM votes v
+      JOIN candidates c ON v.candidate_id = c.id
+      GROUP BY c.id
+    `;
+
+    db.query(query, (err, results) => {
+        if (err) {
+            console.error('SQL error:', err);
+            return res.status(500).json({ error: 'Database error' });
+        }
+        if (results.length === 0) {
+            return res.status(404).json({ error: 'No votes found' });
+        }
+
+        // Loop through the results to create an array of image URLs
+        const imageUrls = results.map(row => row.picture_url.replace(/\\/g, '/'));
+
+        // Create an array to hold base64 images
+        const imagesData = [];
+
+        // Read each image and convert to base64
+        let imagesProcessed = 0;
+        imageUrls.forEach((pictureUrl, index) => {
+            const absolutePath = path.join(__dirname, pictureUrl);
+
+            fs.readFile(absolutePath, (err, data) => {
+                if (err) {
+                    console.error('File read error:', err);
+                    return res.status(500).json({ error: 'Error reading file' });
+                }
+
+                const ext = path.extname(absolutePath).toLowerCase();
+                let mimeType = 'image/jpeg';
+                if (ext === '.png') {
+                    mimeType = 'image/png';
+                } else if (ext === '.gif') {
+                    mimeType = 'image/gif';
+                }
+
+                const base64Data = data.toString('base64');
+                const dataUri = `data:${mimeType};base64,${base64Data}`;
+                imagesData.push(dataUri);
+
+                imagesProcessed++;
+
+                // Once all images are processed, send the response
+                if (imagesProcessed === imageUrls.length) {
+                    res.json({ imageData: imagesData });
+                }
+            });
+        });
+    });
+});
+
+app.post("/update-slide/:id", upload.single("image"), (req, res) => {
+    const { id } = req.params;
+    const { textDetail, linkDetail } = req.body;
+    const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
+
+    let sql = "UPDATE slides SET textDetail = ?, linkDetail = ?";
+    let values = [textDetail, linkDetail];
+
+    if (req.file) {
+        sql += ", imagePath = ?";
+        values.push(imagePath);
+    }
+
+    sql += " WHERE id = ?";
+    values.push(id);
+
+    db.query(sql, values, (err, result) => {
+        if (err) {
+            return res.status(500).json({
+                success: false,
+                message: "Database Error",
+                error: err
+            });
+        }
+
+        res.json({
+            success: true,
+            message: "Slide updated successfully",
+            imagePath: imagePath || ""
+        });
+    });
+});
+
+// Fetch Slides API
+app.get('/get-slides', (req, res) => {
+    const sql = 'SELECT id, textDetail, linkDetail, imagePath FROM slides';
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error("Database Error: ", err);
+            return res.status(500).json({ error: err.message });
+        }
+        console.log("Slides fetched from database:", results);
+        res.json(results);
+    });
+});
+
+app.post('/add-user', (req, res) => {
+    const { name, email, studentID, role } = req.body;
+
+    const sql = `INSERT INTO users (name, email, studentID, role) VALUES (?, ?, ?, ?)`;
+    db.query(sql, [name, email, studentID, role], (err, result) => {
+        if (err) {
+            console.error('Error adding user:', err);
+            return res.status(500).json({ message: "Server error adding user" });
+        }
+        res.json({ message: "User added successfully!" });
+    });
+});
 
 app.get('/api/election-results1', (req, res) => {
     const query = `
@@ -1398,32 +2166,6 @@ app.get('/api/election-results1', (req, res) => {
     });
 });
 
-app.get('/api/election-results2', (req, res) => {
-    const query = `
-        SELECT 
-            c.id AS candidate_id,
-            c.name,
-            c.picture_url,
-            COUNT(v.id) AS score
-        FROM candidates c
-        LEFT JOIN votes v 
-            ON c.id = v.candidate_id 
-            AND v.is_abstention = 0
-            AND v.candidate_type = 'Student council member (School of study)'
-        WHERE c.candidate_type = 'Student council member (School of study)'
-            AND c.status = 'Approved'
-        GROUP BY c.id
-        ORDER BY score DESC
-    `;
-
-    db.query(query, (err, results) => {
-        if (err) {
-            console.error('Error fetching election results:', err);
-            return res.status(500).json({ error: 'Database error' });
-        }
-        res.json(results);
-    });
-});
 
 app.get('/api/election-results3', (req, res) => {
     const query = `
@@ -1452,10 +2194,188 @@ app.get('/api/election-results3', (req, res) => {
     });
 });
 
+app.get('/api/election-results4', (req, res) => {
+    const query = `
+        SELECT 
+            c.id AS candidate_id,
+            c.name,
+            c.picture_url,
+            COUNT(v.id) AS score
+        FROM candidates c
+        LEFT JOIN votes v 
+            ON c.id = v.candidate_id 
+            AND v.is_abstention = 0
+            AND v.candidate_type = 'President of the Faculty Student Council'
+        WHERE c.candidate_type = 'President of the Faculty Student Council'
+            AND c.status = 'Pending'
+        GROUP BY c.id
+        ORDER BY score DESC
+    `;
+
+    db.query(query, (err, results) => {
+        if (err) {
+            console.error('Error fetching election results:', err);
+            return res.status(500).json({ error: 'Database error' });
+        }
+        res.json(results);
+    });
+});
 
 
 
-// Start the server
-app.listen(3000, () => {
-    console.log('Server running on port 3000');
+app.get('/api/election-results2', (req, res) => {
+    const code = req.query.code; // เช่น '14'
+
+    const query = `
+        SELECT c.id AS candidate_id, c.name, c.picture_url, COUNT(v.id) AS score
+        FROM candidates c
+        LEFT JOIN votes v ON v.candidate_id = c.id 
+            AND v.candidate_type = 'Student council member (School of)' 
+            AND v.is_abstention = 0
+        JOIN school_codes sc ON c.school_id = sc.school_id
+        WHERE sc.school_code = ?
+            AND c.candidate_type = 'Student council member (School of)'
+            AND c.status = 'Approved'
+        GROUP BY c.id, c.name, c.picture_url
+        ORDER BY score DESC
+    `;
+
+    db.execute(query, [code], (err, results) => {
+        if (err) {
+            console.error("❌ SQL Error:", err);
+            return res.status(500).json({ message: "Internal server error" });
+        }
+        res.json(results);
+    });
+});
+
+app.post('/api/staff/add', async (req, res) => {
+    const { username, role } = req.body;
+
+    if (!username || !role) {
+        return res.status(400).json({ error: 'Username and role are required' });
+    }
+
+    try {
+        db.query('SELECT * FROM staff WHERE username = ?', [username], async (err, results) => {
+            if (err) {
+                return res.status(500).json({ error: 'Database error' });
+            }
+            if (results.length > 0) {
+                return res.status(400).json({ error: 'Username already exists' });
+            }
+
+            const rawPassword = `${username}123`;
+            const hashedPassword = await bcrypt.hash(rawPassword, 10);
+
+            const insertSql = `INSERT INTO staff (username, password, role) VALUES (?, ?, ?)`;
+            db.query(insertSql, [username, hashedPassword, role], (err, result) => {
+                if (err) {
+                    return res.status(500).json({ error: 'Error inserting user' });
+                }
+
+                res.json({
+                    username,
+                    role,
+                    generatedPassword: rawPassword
+                });
+            });
+        });
+    } catch (error) {
+        console.error('Add staff error:', error);
+        res.status(500).json({ error: 'Unexpected server error' });
+    }
+});
+
+
+app.post('/api/staff/change-password', (req, res) => {
+    const { username, oldPassword, newPassword } = req.body;
+
+    if (!username || !oldPassword || !newPassword) {
+        return res.status(400).json({ error: 'All fields are required' });
+    }
+
+    db.query('SELECT * FROM staff WHERE username = ?', [username], async (err, results) => {
+        if (err) {
+            return res.status(500).json({ error: 'Database error' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const user = results[0];
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ error: 'Incorrect old password' });
+        }
+
+        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+        db.query('UPDATE staff SET password = ? WHERE username = ?', [hashedNewPassword, username], (err) => {
+            if (err) {
+                return res.status(500).json({ error: 'Error updating password' });
+            }
+
+            res.json({ message: 'Password changed successfully' });
+        });
+    });
+});
+
+
+app.post('/loginstaff', (req, res) => {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+        return res.status(400).json({ success: false, message: 'Username and password are required.' });
+    }
+
+    const sql = 'SELECT * FROM staff WHERE username = ?';
+    db.query(sql, [username], async (err, results) => {
+        if (err) {
+            console.error('DB error:', err);
+            return res.status(500).json({ success: false, message: 'Internal server error.' });
+        }
+
+        if (results.length === 0) {
+            return res.status(401).json({ success: false, message: 'Invalid credentials.' });
+        }
+
+        const user = results[0];
+        const match = await bcrypt.compare(password, user.password);
+        if (!match) {
+            return res.status(401).json({ success: false, message: 'Invalid credentials.' });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Login successful.',
+            role: user.role // either 'admin' or 'committee'
+        });
+    });
+});
+
+// Express route
+app.get("/staff-info", (req, res) => {
+    if (!req.user) {
+        return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    // Fetch staff info from the database
+    db.query("SELECT id, username, role FROM staff WHERE id = ?", [req.user.id], (err, results) => {
+        if (err) return res.status(500).json({ error: "Database error" });
+
+        if (results.length === 0) {
+            return res.status(404).json({ error: "Staff not found" });
+        }
+
+        const { id, username, role } = results[0];
+        res.json({ id, username, role });
+    });
+});
+
+
+
+const port = 3000;
+app.listen(port, () => {
+    console.log(`Server is running at ${port}`);
 });

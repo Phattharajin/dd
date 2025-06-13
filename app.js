@@ -18,11 +18,13 @@ app.use(cors());
 
 app.use(express.json());
 app.use(express.static(path.resolve(__dirname, 'public')));
+app.use(express.static(path.resolve(__dirname, 'uploads')));
 
 const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    database: 'candidate1'
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS || '',
+    database: process.env.DB_NAME
 });
 
 db.connect(err => {
@@ -42,11 +44,11 @@ app.get("/home", (req, res) => {
 
 
 app.get("/admin_home", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/admin_home.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'admin_home.html'));
 });
 
 app.get("/committee_home", (req, res) => {
-    res.sendFile(path.resolve("/public/committee_home.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'committee_home.html'));
 });
 
 app.get("/login", (req, res) => {
@@ -54,15 +56,15 @@ app.get("/login", (req, res) => {
 });
 
 app.get("/loginstaff", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/loginstaff.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'loginstaff.html'));
 });
 
 app.get("/add_staff", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/add_staff.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'add_staff.html'));
 });
 
 app.get("/change_password", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/change_password.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'change_password.html'));
 });
 
 app.use(express.json());
@@ -336,15 +338,15 @@ async function fetchSlides() {
 }
 
 app.get("/register_president", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/register_president.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'register_president.html'));
 });
 
 app.get("/register_council_school", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/register_council_school.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'register_council_school.html'));
 });
 
 app.get("/register_council_normal", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/register_council_normal.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'register_council_normal.html'));
 });
 
 app.post("/register-candidate", upload.fields([
@@ -448,27 +450,27 @@ app.post('/candidates', async (req, res) => {
 });
 
 app.get("/PDPA_president", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/PDPA_president.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'PDPA_president.html'));
 });
 
 app.get("/condition_president", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/condition_president.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'condition_president.html'));
 });
 
 app.get("/PDPA_council_school", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/PDPA_council_school.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'PDPA_council_school.html'));
 });
 
 app.get("/condition_council_school", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/condition_council_school.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'condition_council_school.html'));
 });
 
 app.get("/PDPA_council_normal", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/PDPA_council_normal.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'PDPA_council_normal.html'));
 });
 
 app.get("/condition_council_normal", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/condition_council_normal.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'condition_council_normal.html'));
 });
 
 app.get('/api/header-image/:headerId', (req, res) => {
@@ -493,23 +495,22 @@ app.get('/api/header-image/:headerId', (req, res) => {
         });
     });
 });
-
-
 app.get("/information_president_student", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/information_president_student.html"));
+  res.sendFile(path.resolve(__dirname, 'public', 'information_president_student.html'));
 });
 
 app.get("/information_council_school", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/information_council_school.html"));
+  res.sendFile(path.resolve(__dirname, 'public', 'information_council_school.html'));
 });
 
 app.get("/information_council_normal", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/information_council_normal.html"));
+  res.sendFile(path.resolve(__dirname, 'public', 'information_council_normal.html'));
 });
 
 app.get("/information_president_faculty", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/information_president_faculty.html"));
+  res.sendFile(path.resolve(__dirname, 'public', 'information_president_faculty.html'));
 });
+
 
 //--------------vote-----------
 router.post('/api/vote', async (req, res) => {
@@ -584,20 +585,21 @@ app.get('/api/vote-picture', (req, res) => {
 });
 
 app.get("/vote_president_student", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/vote_president_student.html"));
+  res.sendFile(path.resolve(__dirname, 'public', 'vote_president_student.html'));
 });
 
 app.get("/vote_council_school", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/vote_council_school.html"));
+  res.sendFile(path.resolve(__dirname, 'public', 'vote_council_school.html'));
 });
 
 app.get("/vote_council_normal", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/vote_council_normal.html"));
+  res.sendFile(path.resolve(__dirname, 'public', 'vote_council_normal.html'));
 });
 
 app.get("/vote_president_faculty", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/vote_president_faculty.html"));
+  res.sendFile(path.resolve(__dirname, 'public', 'vote_president_faculty.html'));
 });
+
 
 router.post('/api/vote', async (req, res) => {
     const { studentId, candidateId, isAbstention } = req.body;
@@ -976,44 +978,45 @@ app.get('/api/vote-status/:studentId', async (req, res) => {
 });
 
 app.get("/success_president_student", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/success_president_student.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'success_president_student.html'));
 });
 
 app.get("/success_council_school", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/success_council_school.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'success_council_school.html'));
 });
 
 app.get("/success_council_normal", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/success_councul_normal.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'success_councul_normal.html'));
 });
 
 app.get("/success_president_faculty", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/success_president_faculty.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'success_president_faculty.html'));
 });
 
 app.get("/election_result_menu", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/election_result_menu.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'election_result_menu.html'));
 });
 
 app.get("/result_president_student", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/result_president_student.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'result_president_student.html'));
 });
 
 app.get("/result_council_school", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/result_council_school.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'result_council_school.html'));
 });
 
 app.get("/result_council_normal", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/result_council_normal.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'result_council_normal.html'));
 });
 
 app.get("/result_president_faculty", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/result_president_faculty.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'result_president_faculty.html'));
 });
 
 app.get("/list_admin", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/list_admin.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'list_admin.html'));
 });
+
 
 app.get("/admins", (req, res) => {
     const sql = "SELECT id, username, role FROM staff WHERE role IN ('admin', 'committee')";
@@ -1068,7 +1071,7 @@ app.post("/updateRole1", (req, res) => {
 
 
 app.get("/list_user", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/list_user.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'list_user.html'));
 });
 
 
@@ -1086,7 +1089,7 @@ app.get("/users", (req, res) => {
 });
 
 app.get("/list_candidate_menu", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/list_candidate_menu.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'list_candidate_menu.html'));
 });
 
 function fetchCandidatesByType(candidateType, res) {
@@ -1106,7 +1109,6 @@ function fetchCandidatesByType(candidateType, res) {
     });
 }
 
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.get('/api/candidates', (req, res) => {
     const query = `
@@ -1377,35 +1379,35 @@ app.put('/api/updateCandidate/:id', (req, res) => {
 });
 
 app.get("/info_president_student", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/info_president_student.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'info_president_student.html'));
 });
 
 app.get("/info_add_president_student", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/info_add_president_student.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'info_add_president_student.html'));
 });
 
 app.get("/info_council_school", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/info_council_school.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'info_council_school.html'));
 });
 
 app.get("/info_add_council_school", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/info_add_council_school.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'info_add_council_school.html'));
 });
 
 app.get("/info_council_normal", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/info_council_normal.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'info_council_normal.html'));
 });
 
 app.get("/info_add_council_normal", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/info_add_council_normal.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'info_add_council_normal.html'));
 });
 
 app.get("/info_president_faculty", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/info_president_faculty.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'info_president_faculty.html'));
 });
 
 app.get("/PDPA_edit", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/PDPA_edit.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'PDPA_edit.html'));
 });
 
 app.get('/fetch-pdpa', (req, res) => {
@@ -1465,23 +1467,23 @@ app.delete('/delete-image', (req, res) => {
 });
 
 app.get("/datetime_setter_menu", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/datetime_setter_menu.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'datetime_setter_menu.html'));
 });
 
 app.get("/datetime_setter_register", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/datetime_setter_register.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'datetime_setter_register.html'));
 });
 
 app.get("/datetime_setter_info", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/datetime_setter_info.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'datetime_setter_info.html'));
 });
 
 app.get("/datetime_setter_vote", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/datetime_setter_vote.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'datetime_setter_vote.html'));
 });
 
 app.get("/datetime_setter_score", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/datetime_setter_score.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'datetime_setter_score.html'));
 });
 
 const validEvents = [
@@ -1611,31 +1613,31 @@ app.get('/active-events', (req, res) => {
 });
 
 app.get("/add_candidate", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/add_candidate.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'add_candidate.html'));
 });
 
 app.get("/add_user", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/add_user.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'add_user.html'));
 });
 
 app.get("/election_score_menu", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/election_score_menu.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'election_score_menu.html'));
 });
 
 app.get("/score_president_student", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/score_president_student.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'score_president_student.html'));
 });
 
 app.get("/score_council_school", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/score_council_school.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'score_council_school.html'));
 });
 
 app.get("/score_council_normal", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/score_council_normal.html"));
+    res.sendFile(path.resolve(__dirname, 'public','score_council_normal.html'));
 });
 
 app.get("/score_president_faculty", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/score_president_faculty.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'score_president_faculty.html'));
 });
 
 app.get('/api/candidates/approved-scores', (req, res) => {
@@ -1826,15 +1828,15 @@ app.get('/api/candidates/approved-scores1', (req, res) => {
 
 
 app.get("/condition_edit_president", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/condition_edit_president.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'condition_edit_president.html'));
 });
 
 app.get("/condition_edit_council_school", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/condition_edit_council_school.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'condition_edit_council_school.html'));
 });
 
 app.get("/condition_edit_council_normal", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/condition_edit_council_normal.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'condition_edit_council_normal.html'));
 });
 
 // Endpoint to fetch header text by id
@@ -1963,16 +1965,17 @@ app.put("/update-image", upload.single("image"), (req, res) => {
 });
 
 app.get("/approve_president", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/approve_president.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'approve_president.html'));
 });
 
 app.get("/approve_council_school", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/approve_council_school.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'approve_council_school.html'));
 });
 
 app.get("/approve_council_normal", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/approve_council_normal.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'approve_council_normal.html'));
 });
+
 
 app.put('/api/candidates/:id/status', (req, res) => {
     const { id } = req.params;
@@ -2007,10 +2010,8 @@ app.put('/api/candidates/:id/status', (req, res) => {
         }
     });
 });
-
-
 app.get("/history", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/history.html"));
+    res.sendFile(path.resolve(__dirname, 'public', '/history.html'));
 });
 
 app.get('/api/candidates/history', (req, res) => {
@@ -2376,7 +2377,8 @@ app.get("/staff-info", (req, res) => {
 
 
 
-const port = 3000;
-app.listen(port, () => {
-    console.log(`Server is running at ${port}`);
+const PORT = process.env.PORT || 3001;
+
+app.listen(PORT, () => {
+    console.log(`Server listening on port ${PORT}`);
 });

@@ -17,7 +17,7 @@ const router = express.Router();
 app.use(cors());
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.resolve(__dirname, 'public')));
 
 const db = mysql.createConnection({
     host: 'localhost',
@@ -33,23 +33,24 @@ db.connect(err => {
     console.log('Connect to the database.');
 });
 
-app.use("/public", express.static("D:/candidate/public"));
+//app.use("/public", express.static("D:/candidate/public"));
 
 
 app.get("/home", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/home.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'home.html'));
 });
+
 
 app.get("/admin_home", (req, res) => {
     res.sendFile(path.join("D:/candidate/public/admin_home.html"));
 });
 
 app.get("/committee_home", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/committee_home.html"));
+    res.sendFile(path.resolve("/public/committee_home.html"));
 });
 
 app.get("/login", (req, res) => {
-    res.sendFile(path.join("D:/candidate/public/login.html"));
+    res.sendFile(path.resolve(__dirname, 'public', 'login.html'));
 });
 
 app.get("/loginstaff", (req, res) => {
